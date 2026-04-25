@@ -109,48 +109,54 @@ Explicitly excluded with reasoning. These prevent scope creep and document anti-
 
 ## Traceability
 
-Empty initially. Populated during roadmap creation by `gsd-roadmapper`. Each requirement maps to exactly one phase.
+Each v1 requirement maps to exactly one phase. See `ROADMAP.md` for phase definitions and success criteria.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DINER-01 | TBD | Pending |
-| DINER-02 | TBD | Pending |
-| DINER-03 | TBD | Pending |
-| DINER-04 | TBD | Pending |
-| DINER-05 | TBD | Pending |
-| DINER-06 | TBD | Pending |
-| DINER-07 | TBD | Pending |
-| DINER-08 | TBD | Pending |
-| STAFF-01 | TBD | Pending |
-| STAFF-02 | TBD | Pending |
-| STAFF-03 | TBD | Pending |
-| STAFF-04 | TBD | Pending |
-| STAFF-05 | TBD | Pending |
-| STAFF-06 | TBD | Pending |
-| STAFF-07 | TBD | Pending |
-| STAFF-08 | TBD | Pending |
-| STAFF-09 | TBD | Pending |
-| PLAT-01 | TBD | Pending |
-| PLAT-02 | TBD | Pending |
-| PLAT-03 | TBD | Pending |
-| PLAT-04 | TBD | Pending |
-| PLAT-05 | TBD | Pending |
-| PLAT-06 | TBD | Pending |
-| PLAT-07 | TBD | Pending |
-| PLAT-08 | TBD | Pending |
-| SAFE-01 | TBD | Pending |
-| SAFE-02 | TBD | Pending |
-| SAFE-03 | TBD | Pending |
-| DEMO-01 | TBD | Pending |
-| DEMO-02 | TBD | Pending |
-| DEMO-03 | TBD | Pending |
-| DEMO-04 | TBD | Pending |
+| DINER-01 | Phase 3 | Pending |
+| DINER-02 | Phase 3 | Pending |
+| DINER-03 | Phase 3 | Pending |
+| DINER-04 | Phase 3 | Pending |
+| DINER-05 | Phase 3 | Pending |
+| DINER-06 | Phase 3 | Pending |
+| DINER-07 | Phase 3 | Pending |
+| DINER-08 | Phase 3 | Pending |
+| STAFF-01 | Phase 1 | Pending |
+| STAFF-02 | Phase 3 | Pending |
+| STAFF-03 | Phase 3 | Pending |
+| STAFF-04 | Phase 3 | Pending |
+| STAFF-05 | Phase 3 | Pending |
+| STAFF-06 | Phase 3 | Pending |
+| STAFF-07 | Phase 3 | Pending |
+| STAFF-08 | Phase 3 | Pending |
+| STAFF-09 | Phase 3 | Pending |
+| PLAT-01 | Phase 2 | Pending |
+| PLAT-02 | Phase 2 | Pending |
+| PLAT-03 | Phase 2 | Pending |
+| PLAT-04 | Phase 1 | Pending |
+| PLAT-05 | Phase 2 | Pending |
+| PLAT-06 | Phase 1 | Pending |
+| PLAT-07 | Phase 2 | Pending |
+| PLAT-08 | Phase 3 | Pending |
+| SAFE-01 | Phase 2 | Pending |
+| SAFE-02 | Phase 3 | Pending |
+| SAFE-03 | Phase 3 | Pending |
+| DEMO-01 | Phase 1 | Pending |
+| DEMO-02 | Phase 1 | Pending |
+| DEMO-03 | Phase 4 | Pending |
+| DEMO-04 | Phase 2 | Pending |
 
 **Coverage:**
 - v1 requirements: 32 total
-- Mapped to phases: 0 (filled by roadmapper)
-- Unmapped: 32 ⚠️ (will resolve after roadmap created)
+- Mapped to phases: 32 (100%) ✓
+- Unmapped: 0 ✓
+
+**Per-phase counts:**
+- Phase 1 — Foundation: 5 requirements (STAFF-01, PLAT-04, PLAT-06, DEMO-01, DEMO-02)
+- Phase 2 — Backend Core: 7 requirements (PLAT-01, PLAT-02, PLAT-03, PLAT-05, PLAT-07, SAFE-01, DEMO-04)
+- Phase 3 — User Surfaces: 19 requirements (all 8 DINER + STAFF-02..09 + PLAT-08 + SAFE-02 + SAFE-03)
+- Phase 4 — Pilot-Hardening + Demo: 1 requirement (DEMO-03) — most Phase 4 work is hardening discipline (rate limit, idempotency, monitoring, PII audit, smoke tests) captured in roadmap success criteria, not separate v1 requirements
 
 ---
 *Requirements defined: 2026-04-25*
-*Last updated: 2026-04-25 after initial definition*
+*Last updated: 2026-04-25 after roadmap creation (traceability mapping populated)*
