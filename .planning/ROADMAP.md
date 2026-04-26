@@ -36,7 +36,7 @@ These are NOT a phase the agent runs. They are **blocking human work** that must
 ## Phases
 
 - [ ] **Phase 1: Foundation** — Empty Next.js 16 deployed to Vercel with DB, Auth.js magic-link, Edge Config, KV provisioned, env vars set in all environments
-- [ ] **Phase 2: Backend Core** — MCP server + service layer + WDK durable workflow + KV pub/sub + SSE handlers; money-shot smoke test passes (CRITICAL PATH) — 6/8 plans done (02-01 spikes-skew, 02-02 log-redactor, 02-03 service-layer, 02-04 workflow, 02-05 mcp, 02-06 sse)
+- [ ] **Phase 2: Backend Core** — MCP server + service layer + WDK durable workflow + KV pub/sub + SSE handlers; money-shot smoke test passes (CRITICAL PATH) — 7/8 plans done (02-01 spikes-skew, 02-02 log-redactor, 02-03 service-layer, 02-04 workflow, 02-05 mcp, 02-06 sse, 02-07 staff-api)
 - [ ] **Phase 3: User Surfaces** — Chatbot embed (diner self-serve) + maître panel (queue + history + actions) + DurableAgent ETA, both surfaces real-time via SSE
 - [ ] **Phase 4: Pilot-Hardening + Demo** — Rate limiting, idempotency, monitoring, PII audit, smoke test script, demo video recording, README polish, final prod deploy
 
@@ -102,8 +102,8 @@ Plans:
 - [x] 02-03-service-layer-PLAN.md — `lib/services/reservations.ts` (4 funcs) + `lib/services/queue.ts` (4 funcs) + `lib/realtime.ts` + 0002 migration; ships service-layer-funnel commitment (Wave 1, requirements: PLAT-01)
 - [x] 02-04-workflow-PLAN.md — `lib/workflows/reservation.ts` durable lifecycle workflow (5 typed hooks + 10 steps + 3-phase router) + `createReservation` start() wired with D-14 compensating action + `_README.md` Implementation Notes; ships PLAT-03 (Wave 1, requirements: PLAT-03)
 - [x] 02-05-mcp-PLAN.md — MCP server route at `app/mcp/[transport]/route.ts` with 4 tools (`create_reservation`, `get_reservation_status`, `extend_wait`, `cancel_reservation`) + `lib/mcp/auth.ts` (constant-time bearer verify + session resolution); ships PLAT-02 (Wave 1, requirements: PLAT-02)
-- [ ] 02-06-sse-PLAN.md
-- [ ] 02-07-staff-api-PLAN.md
+- [x] 02-06-sse-PLAN.md — SSE Route Handlers (`/api/events/[reservation_id]` diner + `/api/events/queue` staff) with Pattern 3 snapshot-replay-on-connect, Last-Event-ID gap recovery, abort cleanup; ships PLAT-07 (Wave 2, requirements: PLAT-07)
+- [x] 02-07-staff-api-PLAN.md — Staff action API endpoints (GET `/api/queue` + POST `/api/queue/[id]/{call,seated,no_show_manual}`) as 5–15 LOC wrappers around `lib/services/queue.ts`; ships PLAT-01 + PLAT-03 staff surface (Wave 2, requirements: PLAT-01, PLAT-03)
 - [ ] 02-08-smoke-PLAN.md
 
 **Pitfalls addressed in this phase:**

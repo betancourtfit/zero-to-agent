@@ -32,7 +32,8 @@ Requirements for the hackathon MVP and the same-week pilot. Every requirement ma
 
 ### Plataforma — backend (PLAT)
 
-- [ ] **PLAT-01**: MCP server público en `app/mcp/[transport]/route.ts` (`mcp-handler@1.1.0` + `withMcpAuth`) expone 4 tools: `create_reservation`, `get_reservation_status`, `extend_wait`, `cancel_reservation`
+- [x] **PLAT-01
+**: MCP server público en `app/mcp/[transport]/route.ts` (`mcp-handler@1.1.0` + `withMcpAuth`) expone 4 tools: `create_reservation`, `get_reservation_status`, `extend_wait`, `cancel_reservation`
 - [ ] **PLAT-02**: Cada MCP tool valida identidad por bearer `MCP_API_KEY` del chatbot Y por `session_token` del comensal (header `X-Reservation-Session`); el LLM nunca pasa `reservation_id` para acciones — se resuelve server-side desde el session_token (mitiga Pitfall #5: tool poisoning)
 - [x] **PLAT-03
 **: Workflow WDK (`workflow` package) durable por reserva, ciclo completo `waiting → called → seated|no_show|cancelled` con rama `extend`, usando `createHook()` + `Promise.race(hook, sleep("..."))` (NO `waitForEvent` — esa API no existe). Workflow shape congelado al cierre de Phase 2
@@ -133,9 +134,9 @@ Each v1 requirement maps to exactly one phase. See `ROADMAP.md` for phase defini
 | STAFF-07 | Phase 3 | Pending |
 | STAFF-08 | Phase 3 | Pending |
 | STAFF-09 | Phase 3 | Pending |
-| PLAT-01 | Phase 2 | Pending |
+| PLAT-01 | Phase 2 | Complete (02-07-staff-api) |
 | PLAT-02 | Phase 2 | Pending |
-| PLAT-03 | Phase 2 | Pending |
+| PLAT-03 | Phase 2 | Complete (02-07-staff-api) |
 | PLAT-04 | Phase 1 | Pending |
 | PLAT-05 | Phase 2 | Pending |
 | PLAT-06 | Phase 1 | Pending |

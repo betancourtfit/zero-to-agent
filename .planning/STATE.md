@@ -3,18 +3,18 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-last_updated: "2026-04-26T11:42:46.559Z"
+last_updated: "2026-04-26T11:51:47.655Z"
 progress:
   total_phases: 4
   completed_phases: 1
   total_plans: 12
-  completed_plans: 10
-  percent: 83
+  completed_plans: 11
+  percent: 92
 ---
 
 # State: Zero to Agent — Restaurant Queue MVP
 
-**Last updated:** 2026-04-26 after plan 02-06-sse completion
+**Last updated:** 2026-04-26 after plan 02-07-staff-api completion
 
 ---
 
@@ -33,16 +33,16 @@ progress:
 ## Current Position
 
 Phase: 02 (backend-core) — EXECUTING
-Plan: 7 of 8 (next: 02-07-staff-api)
+Plan: 8 of 8 (next: 02-08-smoke)
 **Milestone:** v1 (hackathon MVP + pilot)
 **Phase:** 2
-**Plan:** 02-01..02-06 complete; 02-07 next
+**Plan:** 02-01..02-07 complete; 02-08 next (final Phase 2 plan)
 **Status:** Executing Phase 02
-**Progress:** [████████░░] 83%
+**Progress:** [█████████░] 92%
 
-**Next action:** Plan 02-07 (staff API endpoints — `POST /api/queue/[id]/{call,seated,no_show_manual}`) is next. All dependencies are met: service layer (02-03), workflow + hooks (02-04), realtime publishers (02-03 helpers), and now SSE consumers (02-06). The auth pattern was just freshly established in `app/api/events/queue/route.ts` — `auth()` session check + redundant `employees.active = true` lookup. Staff API can copy that block. Plan 02-08 is the final plan and still defers B2 (Skew Protection toggle) until rehearsal time.
+**Next action:** Plan 02-08 (money-shot smoke test) is the final Phase 2 plan. It HARD-blocks on B2 (Skew Protection) — the user must click Vercel Dashboard → Settings → Skew Protection → Enable before the rehearsal. This is the rehearsal of the money-shot demo: create 2 reservations via MCP, sleep 3s, manually `git push` to redeploy, assert in-flight reservations resume via SSE post-deploy. After 02-08 lands, Phase 2 closes and Phase 3 (User Surfaces) becomes the next phase.
 
-After plan 02-06, `npm run build` reports `Created manifest with 14 steps, 1 workflow, and 0 classes` — workflow count preserved (the new SSE routes only read DB + subscribe to KV; they do not import `lib/workflows/reservation.ts`).
+After plan 02-07, `npm run build` reports `Created manifest with 14 steps, 1 workflow, and 0 classes` — workflow count preserved (these routes consume the workflow indirectly via `lib/services/queue.ts → resumeHook(...)` but do not import the workflow file directly). All four staff action endpoints are live in the route table: `/api/queue` (GET), `/api/queue/[id]/call` (POST), `/api/queue/[id]/seated` (POST), `/api/queue/[id]/no_show_manual` (POST).
 
 ---
 
@@ -61,7 +61,7 @@ After plan 02-06, `npm run build` reports `Created manifest with 14 steps, 1 wor
 
 ## Performance Metrics
 
-**Plans completed:** 10 (Phase 1: 4 plans + Phase 2: 6 plans — through 02-06-sse)
+**Plans completed:** 11 (Phase 1: 4 plans + Phase 2: 7 plans — through 02-07-staff-api)
 **Plans repaired:** 0
 **Phases completed:** 1 (Phase 1 — Foundation)
 **Cycles per plan (avg):** 1.0
@@ -74,6 +74,7 @@ After plan 02-06, `npm run build` reports `Created manifest with 14 steps, 1 wor
 | Phase 02-backend-core P03 (service-layer) | 15m | 4 atomic tasks | 5 files |
 | Phase 02-backend-core P04 (workflow) | 7m | 2 atomic tasks | 3 files |
 | Phase 02-backend-core P06 (sse) | 5m | 2 atomic tasks | 2 files |
+| Phase 02-backend-core P07 (staff-api) | 3m | 4 atomic tasks | 4 files |
 
 ---
 
@@ -116,6 +117,8 @@ After plan 02-06, `npm run build` reports `Created manifest with 14 steps, 1 wor
 | Pattern 3 (snapshot-replay-on-connect) reference implementation lives in `app/api/events/[reservation_id]/route.ts` and `app/api/events/queue/route.ts`. Order: Postgres snapshot → SSE emit (with id == max event id) → optional gap-recover from `reservation_events` (bounded by `[clientCursor, snapshot.last_event_id]`) → KV subscribe → heartbeat → abort cleanup. Position is computed (no DB column); staff snapshot uses `getActiveQueue()` service to share single source of truth with the panel page | Plan 02-06 task 1 + 2 | Pitfall #6 (missed message during reconnect) and Pitfall #7 (subscriber slot leak) both mitigated; future surfaces (chatbot, panel) consume these endpoints unchanged |
 | Staff SSE auth uses `session.user.email` to look up `employees` (matching `lib/auth/auth.ts` session callback and `app/queue/page.tsx`) — the Auth.js v5 session in this app surfaces `email`, not `id`. Defense in depth: route re-checks `employees.active` even though the session callback already strips inactive employees | Plan 02-06 deviation #5 (Rule 1) | Plan 02-07 staff API endpoints will follow the same pattern; route is self-auditable |
 | Next.js 16 dynamic route params is `Promise<{...}>` and must be awaited inside route handlers | Plan 02-06 deviation #4 (Rule 3) | All future dynamic-segment routes in this repo follow this pattern (already true of `mcp/[transport]/route.ts` indirectly via mcp-handler) |
+| All four staff action API endpoints (GET /api/queue + POST /api/queue/[id]/{call,seated,no_show_manual}) ship as 5–15 line wrappers around `lib/services/queue.ts` — strict ARCHITECTURE §3.1 service-layer funnel adherence; zero SQL/business logic in routes (only the auth-gate `employees` lookup). Plan task 4 pseudocode for inline DB+KV+resumeHook in no_show_manual was superseded by service's `markNoShowManual()` (added in plan 02-03 deviation #2 specifically to back this endpoint) | Plan 02-07 task 4 deviation (Rule 4 architectural alignment) | Phase 3 panel calls these endpoints unchanged; future WhatsApp adapter (post-v1) reuses the same service functions |
+| Staff route HTTP status mapping: 401 (no session), 403 (signed-in but inactive employee), 404 (RESERVATION_NOT_FOUND), 409 (state-conflict codes RESERVATION_ALREADY_CLOSED/NOT_IN_*), 400 (INVALID_INPUT/INVALID_SESSION), 500 (default). 401 vs 403 distinction lets the Phase 3 panel route /login vs cuenta-desactivada-screen separately. `statusForErrorCode()` switch is duplicated across the 3 POST routes intentionally — short, drift-resistant via grep, no shared helper file | Plan 02-07 implementation refinement | Phase 3 panel UX maps result.error.code → user-visible Spanish copy without parsing message strings |
 
 ### Pending Todos
 
@@ -158,13 +161,13 @@ After plan 02-06, `npm run build` reports `Created manifest with 14 steps, 1 wor
 
 ## Session Continuity
 
-**Previous session ended:** 2026-04-26 after plan 02-06-sse completion. Two SSE Route Handlers shipped: `app/api/events/[reservation_id]/route.ts` (diner, 276 LOC) and `app/api/events/queue/route.ts` (staff, 199 LOC). Both implement Pattern 3 (snapshot-replay-on-connect): Postgres snapshot first, SSE emit with `id == COALESCE(MAX(reservation_events.id), 0)`, optional Last-Event-ID gap recovery, then `redis.subscribe(...)`, with 25s heartbeat and abort-driven cleanup that releases the Upstash subscriber slot. Five Rule 1/Rule 3 deviations from plan pseudocode (wrong Upstash API surface, double-parse, missing `position` column, Next 16 params Promise, `session.user.id` vs `.email`) — all mechanical corrections, design intent preserved. Build manifest still reports `1 workflow`. PLAT-07 complete.
+**Previous session ended:** 2026-04-26 after plan 02-07-staff-api completion. Four staff action API endpoints shipped, all auth-gated thin wrappers around `lib/services/queue.ts`: `app/api/queue/route.ts` (GET active queue, 57 LOC), `app/api/queue/[id]/call/route.ts` (POST markCalled, 95 LOC), `app/api/queue/[id]/seated/route.ts` (POST markSeated, 87 LOC), `app/api/queue/[id]/no_show_manual/route.ts` (POST markNoShowManual, 95 LOC). All four copy the auth pattern from `app/api/events/queue/route.ts` — `auth()` session check + `employees.active` lookup by email + 401/403 error responses. ServiceResult error codes mapped to HTTP status (404/409/400/500). One Rule 4 architectural deviation: plan task 4 specified inline DB+KV+resumeHook for no_show_manual, but service layer's `markNoShowManual()` (added in plan 02-03 deviation #2) already covers this — wrapped service instead to preserve §3.1 funnel. Build manifest still reports `1 workflow`. PLAT-01 + PLAT-03 complete via this plan.
 
 **Next session should:**
 
-1. Run plan 02-07 (staff API endpoints — `POST /api/queue/[id]/{call,seated,no_show_manual}`). All dependencies are met: service layer (02-03), workflow + hooks (02-04), realtime publishers (02-03 helpers), and now SSE consumers (02-06). The auth pattern was just freshly established in `app/api/events/queue/route.ts` — `auth()` session check + redundant `employees.active = true` lookup. Staff API can copy that block.
-2. Plan 02-08 (money-shot smoke) is the final phase plan and DOES still require B2 (Skew Protection) toggled in the Vercel dashboard before the rehearsal. The user must click Vercel Dashboard → Settings → Skew Protection → Enable before running the smoke. This is NOT a code blocker for 02-07 — it only matters at the money-shot rehearsal moment.
-3. Phase 03 (user surfaces) consumes both SSE endpoints unchanged: chatbot reads `/api/events/${reservation_id}?session_token=...`; staff panel reads `/api/events/queue`. Pattern is `new EventSource(url)` + `evtSource.addEventListener('snapshot', ...)` + store last seen `event.lastEventId` in `localStorage` for reconnect.
+1. Run plan 02-08 (money-shot smoke test) — the final Phase 2 plan. **HARD-blocked on B2** (Skew Protection in Vercel dashboard). Before running 02-08, the user must click Vercel Dashboard → Project → Settings → Skew Protection → Enable. After B2 clears, the plan creates 2 reservations via MCP, sleeps 3s, prompts the user to `git push` (manual gesture), then polls `/api/events/<id>?session_token=...` for 60s asserting both reservations show post-deploy SSE activity.
+2. After plan 02-08 lands and `npm run smoke:money-shot` passes against production, Phase 2 closes. Phase 3 (User Surfaces) becomes the next phase — chatbot UI + maître panel — and consumes the 4 staff action endpoints (this plan) + 2 SSE endpoints (plan 02-06) + 4 MCP tools (plan 02-05) + service layer (plan 02-03) UNCHANGED.
+3. Phase 3 panel REST contract is now locked: first-paint via `GET /api/queue`, live updates via `/api/events/queue` SSE, action buttons hit `POST /api/queue/<id>/{call,seated,no_show_manual}`. Error UX inspects `result.error.code` (not just HTTP status) — codes are stable across MCP + service + REST.
 
 **If returning after long gap:**
 
@@ -187,3 +190,5 @@ After plan 02-06, `npm run build` reports `Created manifest with 14 steps, 1 wor
 **Last completed plan:** 02-04-workflow — 2026-04-26 — commits 720f430, f145d22
 
 **Last completed plan:** 02-06-sse — 2026-04-26 — commits 855c737, 15ad508
+
+**Last completed plan:** 02-07-staff-api — 2026-04-26 — commits ea32967, 415b0cc, 59e4d28, d62dc5d
