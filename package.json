@@ -10,7 +10,10 @@
     "check:env-sync": "bash scripts/check-env-sync.sh",
     "edge-config:seed": "tsx scripts/edge-config-seed.ts",
     "edge-config:seed:force": "tsx scripts/edge-config-seed.ts -- --force",
-    "smoke:kv": "tsx scripts/smoke-test-kv.ts"
+    "smoke:kv": "tsx scripts/smoke-test-kv.ts",
+    "db:migrate": "tsx scripts/db-migrate.ts",
+    "seed:maitre": "tsx scripts/seed-maitre.ts",
+    "test:pg": "tsx scripts/load-test-pg.ts"
   },
   "dependencies": {
     "@auth/pg-adapter": "^1.11.2",
