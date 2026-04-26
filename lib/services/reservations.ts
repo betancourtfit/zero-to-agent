@@ -10,7 +10,7 @@
 //   - DB-backed safety net (D-10): INSERT reservation_events BEFORE resumeHook
 //   - Hook resume in-process (D-37): import resumeHook from "workflow/api"
 
-import { resumeHook } from "workflow/api";
+import { resumeHook, start } from "workflow/api";
 import { z } from "zod";
 
 import { sql } from "@/lib/db/neon";
@@ -20,6 +20,7 @@ import {
   publishQueueEvent,
   publishReservationEvent,
 } from "@/lib/realtime";
+import { reservationWorkflow } from "@/lib/workflows/reservation";
 
 // Structured error contract (D-04). The MCP tool layer JSON.stringify's this
 // into the text content returned to the LLM. Phase 3 system prompt rule:
@@ -186,35 +187,38 @@ export async function createReservation(
   // D-14 compensating action: workflow.start failure leaves the row marked
   // failed_to_start for forensic audit; row is NOT deleted. Active-queue
   // queries filter status NOT IN ('failed_to_start','seated','no_show','cancelled').
-  //
-  // TODO(02-04): replace this stub with a real start() call once
-  // lib/workflows/reservation.ts exists. The shape will be:
-  //
-  //   import { start } from "workflow/api";
-  //   import { reservationWorkflow } from "@/lib/workflows/reservation";
-  //   try {
-  //     const run = await start(reservationWorkflow, [{ reservationId }]);
-  //     await sql`
-  //       UPDATE reservations
-  //       SET workflow_run_id = ${run.runId},
-  //           active_hook_token = ${`reservation:${reservationId}:waiting`}
-  //       WHERE id = ${reservationId}
-  //     `;
-  //   } catch (err) {
-  //     await sql`UPDATE reservations SET status='failed_to_start' WHERE id = ${reservationId}`;
-  //     log.error("reservation.create.workflow_start_failed", err, { reservation_id: reservationId });
-  //     throw err;
-  //   }
-  //
-  // For 02-03 we set active_hook_token=null and workflow_run_id=null. Plan
-  // 02-04 owns the real wiring; until then the row is effectively orphaned
-  // (no workflow driving it). This is acceptable because no caller exercises
-  // createReservation in 02-03 — MCP tools land in 02-05 which depends on 02-04.
-  await sql`
-    UPDATE reservations
-    SET active_hook_token = ${`reservation:${reservationId}:waiting`}
-    WHERE id = ${reservationId}
-  `;
+  // Wired in plan 02-04 alongside lib/workflows/reservation.ts.
+  try {
+    const run = await start(reservationWorkflow, [{ reservationId }]);
+    await sql`
+      UPDATE reservations
+      SET workflow_run_id = ${run.runId},
+          active_hook_token = ${`reservation:${reservationId}:waiting`},
+          updated_at = NOW()
+      WHERE id = ${reservationId}
+    `;
+    log.info("reservation.create.workflow_started", {
+      reservation_id: reservationId,
+      run_id: run.runId,
+    });
+  } catch (err) {
+    await sql`
+      UPDATE reservations
+      SET status = 'failed_to_start',
+          updated_at = NOW()
+      WHERE id = ${reservationId}
+    `;
+    log.error("reservation.create.workflow_start_failed", err, {
+      reservation_id: reservationId,
+    });
+    return {
+      ok: false,
+      error: {
+        code: "INTERNAL_ERROR",
+        message: "No pudimos iniciar tu reserva. Intentá de nuevo.",
+      },
+    };
+  }
 
   const position = await computePosition(reservationId);
   const etaMin = await estimateEtaMin(position);
