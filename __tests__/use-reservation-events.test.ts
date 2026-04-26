@@ -72,9 +72,8 @@ class StubEventSource {
 // ============================================================
 // Shim globals needed for the hook (runs in Node, not browser)
 // ============================================================
-declare global {
-  var EventSource: typeof StubEventSource; // eslint-disable-line no-var
-}
+// Assign stub to globalThis without a conflicting type declaration.
+// The var declaration would conflict with lib.dom.d.ts; cast to unknown instead.
 (globalThis as Record<string, unknown>).EventSource = StubEventSource;
 
 // ============================================================
