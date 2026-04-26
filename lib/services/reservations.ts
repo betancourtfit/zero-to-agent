@@ -10,7 +10,9 @@
 //   - DB-backed safety net (D-10): INSERT reservation_events BEFORE resumeHook
 //   - Hook resume in-process (D-37): import resumeHook from "workflow/api"
 
-import { resumeHook, start } from "workflow/api";
+import { start } from "workflow/api";
+
+import { safeResumeHook } from "@/lib/workflows/safe-resume";
 import { z } from "zod";
 
 import { sql } from "@/lib/db/neon";
@@ -433,11 +435,11 @@ export async function extendWait(
   `) as Array<{ id: number }>;
 
   if (row.active_hook_token) {
-    await resumeHook(row.active_hook_token, {
-      type: "extend",
-      new_deadline: no_show_deadline,
-      extension_count,
-    });
+    await safeResumeHook(
+      row.active_hook_token,
+      { type: "extend", new_deadline: no_show_deadline, extension_count },
+      { reservation_id: row.id, intent: "extend" },
+    );
   } else {
     log.warn("reservation.extend.no_active_hook", {
       reservation_id: row.id,
@@ -535,7 +537,11 @@ export async function cancelReservation(
   `) as Array<{ id: number }>;
 
   if (row.active_hook_token) {
-    await resumeHook(row.active_hook_token, { type: "cancel" });
+    await safeResumeHook(
+      row.active_hook_token,
+      { type: "cancel" },
+      { reservation_id: row.id, intent: "cancel" },
+    );
   } else {
     log.warn("reservation.cancel.no_active_hook", {
       reservation_id: row.id,

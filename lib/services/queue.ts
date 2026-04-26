@@ -10,14 +10,13 @@
 //   - DB-backed safety net (D-10): INSERT reservation_events BEFORE resumeHook
 //   - Hook resume in-process (D-37): import resumeHook from "workflow/api"
 
-import { resumeHook } from "workflow/api";
-
 import { sql } from "@/lib/db/neon";
 import { log } from "@/lib/log";
 import {
   publishQueueEvent,
   publishReservationEvent,
 } from "@/lib/realtime";
+import { safeResumeHook } from "@/lib/workflows/safe-resume";
 
 import type { ServiceResult } from "@/lib/services/reservations";
 
@@ -161,7 +160,11 @@ export async function markCalled(
   `) as Array<{ id: number }>;
 
   if (tokenToResume) {
-    await resumeHook(tokenToResume, { type: "call" });
+    await safeResumeHook(
+      tokenToResume,
+      { type: "call" },
+      { reservation_id: reservationId, intent: "call" },
+    );
   } else {
     log.warn("queue.call.no_active_hook", { reservation_id: reservationId });
   }
@@ -243,7 +246,11 @@ export async function markSeated(
   `) as Array<{ id: number }>;
 
   if (tokenToResume) {
-    await resumeHook(tokenToResume, { type: "seated" });
+    await safeResumeHook(
+      tokenToResume,
+      { type: "seated" },
+      { reservation_id: reservationId, intent: "seated" },
+    );
   } else {
     log.warn("queue.seated.no_active_hook", { reservation_id: reservationId });
   }
@@ -328,7 +335,11 @@ export async function markNoShowManual(
   `) as Array<{ id: number }>;
 
   if (tokenToResume) {
-    await resumeHook(tokenToResume, { type: "no_show_manual" });
+    await safeResumeHook(
+      tokenToResume,
+      { type: "no_show_manual" },
+      { reservation_id: reservationId, intent: "no_show_manual" },
+    );
   } else {
     log.warn("queue.no_show.no_active_hook", {
       reservation_id: reservationId,
