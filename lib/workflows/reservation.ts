@@ -484,7 +484,7 @@ export async function reservationWorkflow(
   }
 
   let lastSeenEventId: number | null = initial.last_seen_event_id;
-  let currentStatus: string = initial.status;
+  const currentStatus: string = initial.status;
 
   if (currentStatus === "waiting") {
     await setActiveHookToken(
