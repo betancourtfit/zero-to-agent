@@ -148,18 +148,32 @@ Phase 3 ships the two human-facing surfaces of the product:
   - `/queue/history` loading: skeleton table rows.
   - Action button error (e.g., `409 RESERVATION_ALREADY_CLOSED` if the diner cancelled while the maître was about to click Llamar): toast (shadcn `Sonner`) with the Spanish error message + the button auto-disables (the SSE update is also coming).
 
-### DurableAgent ETA scope (PLAT-08; cut list #1)
+### DurableAgent ETA scope (PLAT-08; cut list #1) — REVISED 2026-04-26 per RESEARCH.md §0
 
-- **D-20:** **Phase 3 ships the deterministic formula INSIDE a `@workflow/ai/agent` wrapper, not the LLM-tuned variant.** The `recompute_eta` step in `lib/workflows/reservation.ts` already exists from Phase 2 (Claude's Discretion item — the formula is `position * avg_turnover_min` from Edge Config). Phase 3 swaps the BODY only (D-11 freeze rule allows this — see `lib/workflows/_README.md` "How to Add a New Step Safely") to wrap the deterministic computation inside the agent constructor:
+> **Path C selected** after research found that `@workflow/ai/agent` cannot be instantiated inside a `"use step"` function (framework constraint at workflow-sdk.dev/docs/api-reference/workflow-ai/durable-agent — must live at `"use workflow"` router level). Original D-20 wrapping `new DurableAgent(...)` in step body would either throw at runtime or break replay. Router-level placement (Path A) violates D-11 freeze rule. Path C below preserves both constraints by using AI SDK's plain `generateText` instead of `@workflow/ai/agent`.
+
+- **D-20 (REVISED — Path C):** **Phase 3 swaps the body of `recompute_eta` step in `lib/workflows/reservation.ts` to call `generateText` from the `ai` SDK** (NOT `@workflow/ai/agent`). Step boundary count and order are UNCHANGED (D-11 freeze honored). Shape:
   ```ts
-  // Inside step body — NEVER at router level
-  const agent = new DurableAgent({ ... });
-  const eta = await agent.run({ position, partySize, avgTurnoverMin });
-  // Inside agent.run, the system prompt forces deterministic output — formula in, formula out.
+  // Inside step body — preserves freeze; framework-safe
+  import { generateText } from "ai";
+  const { text } = await generateText({
+    model: "anthropic/claude-sonnet-4.6",
+    temperature: 0,
+    system: "You are an ETA estimator. Return ONLY an integer minute count.",
+    prompt: `Position ${position}, party size ${partySize}, avg turnover ${avgTurnoverMin}min. Estimate wait in minutes.`,
+  });
+  const etaMin = Number.parseInt(text.trim(), 10);
+  // Persist via UPDATE reservations — sample-once-and-store per D-22.
   ```
-  This satisfies Track 2 narrative ("ETA estimated by an agent") with zero LLM cost AND zero quality risk. The agent CAN be promoted to LLM-tuned later by changing the agent's tool/prompt — still a step BODY change, still safe.
-- **D-21:** **LLM-tuned ETA is a 4h-capped spike, NOT a Phase 3 commitment.** Spike scope: feed the agent a small history table (`reservation_events` JOIN with party_size) and ask it to estimate ETA in minutes. Compare against the deterministic formula across 20 historical reservations from the seed-demo workflow runs. Ship the LLM-tuned version ONLY IF the agent's ETA is visibly closer to actual `seated_at - created_at` than the formula AND the LLM cost is <$0.01 per recompute. Otherwise the formula stays. **Either way the wrapper stays.** Decision deferred to plan-phase / executor; the spike is a Phase 3 plan task.
-- **D-22:** **`recompute_eta` step body MUST stay deterministic-on-replay.** WDK replays steps; if the agent's LLM call is non-deterministic the workflow's stored output won't match the replayed value, breaking durability. Mitigation: (a) `temperature: 0` on the agent's LLM (if used), (b) the step result is what's persisted — the agent runs ONCE per step invocation, and `eta_min` is sampled-and-stored on the row exactly like `no_show_deadline` is in Phase 2 D-13. Sample-once-and-store discipline applies. Edge Config `eta_recompute_interval_sec` controls how often the workflow re-enters the recompute step.
+  Track 2 narrative ("ETA estimated by LLM") is preserved at the cost of NOT using the literal `@workflow/ai/agent` package. The package was the means; the ETA-by-LLM is the narrative end. Path C delivers the end.
+
+- **D-20.1 (FALLBACK — Path D):** If the LLM-driven ETA proves visibly worse than the deterministic formula during dev OR if the planner's running Phase 3 estimate exceeds budget, the step body falls back to the deterministic formula `position * avg_turnover_min` (Phase 2's existing body) and PLAT-08 ships as "formula" rather than "agent-driven". This is the documented PROJECT.md cut list #1.
+
+- **D-21 (REVISED):** **The "LLM tuning" spike is the Path C implementation itself.** Cap: 4h. Compare LLM-generated ETA against the deterministic formula across the 3 seed-demo reservations + ≥10 manual workflow runs. Ship Path C ONLY IF (a) LLM ETA is within 25% of actual `seated_at - created_at` on demo data AND (b) cost is <$0.01 per recompute (verifiable via Vercel AI Gateway dashboard). Otherwise fall back to D-20.1. Decision is made at plan execution time, NOT at plan-phase time — both paths are planned.
+
+- **D-22 (UNCHANGED):** **`recompute_eta` step body MUST stay deterministic-on-replay.** WDK replays steps; the LLM call's output is non-deterministic by nature, but the WORKFLOW's stored output is deterministic because step output is sampled-once-and-stored. Specifically: (a) `temperature: 0` on the LLM call, (b) the step's return value (`eta_min` integer) is what's persisted in the workflow event log AND in `reservations.eta_min`, (c) on replay, the step does NOT re-call the LLM — the persisted output is replayed verbatim. This is the same pattern as `no_show_deadline` in Phase 2 D-13. Edge Config `eta_recompute_interval_sec` controls how often the workflow re-enters the recompute step.
+
+- **D-22.1 (NEW — Path E rejected):** Appending a NEW step at the end of the router that runs the agent at workflow level via `start()` was considered (Path E from RESEARCH.md §0). REJECTED for Phase 3 because: (a) it adds 4-8h scope conflicting with the 4h cap on D-21, (b) it requires the agent to be its own workflow function called via `start()`, which adds a second workflow definition to maintain, (c) Path C delivers equivalent narrative value in less code. Path E remains a viable v2 path if the team wants the literal `@workflow/ai/agent` package in production for marketing/Track 2 reasons.
 
 ### AI SDK ↔ PII redactor wiring (SAFE-01 carry-forward, Phase 2 D-22; Pitfall #15)
 
