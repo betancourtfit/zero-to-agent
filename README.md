@@ -1,36 +1,51 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Cola de Espera (Restaurant Queue MVP)
 
-## Getting Started
+Restaurant waitlist MVP for the hackathon pilot. Spanish chatbot for diners, auth-protected panel for the maître, durable WDK workflow per reservation, all on Vercel.
 
-First, run the development server:
+**Production URL:** _set after `vercel link` — pilot bookmarks this_
+
+## Stack
+
+- Next.js 16 (App Router, Turbopack, `proxy.ts` not `middleware.ts`)
+- Neon Postgres (`@neondatabase/serverless` for app + `pg.Pool` for Auth.js)
+- Upstash Redis (`@upstash/redis`)
+- Vercel Edge Config (operational params)
+- Auth.js v5 (`next-auth@beta`) + Resend magic-link
+- Tailwind v4 + shadcn/ui
+
+## Quickstart (local dev)
 
 ```bash
+git clone <repo-url>
+cd zero-to-agent
+npm install
+vercel link            # link to existing Vercel project
+vercel env pull .env.local
+npm run db:migrate     # available after PLAN-03
+npm run seed:maitre    # available after PLAN-03
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000 — Spanish landing page.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Phase 1 scripts (added across plans)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `npm run dev` — local dev server
+- `npm run build` — production build (env validation runs)
+- `npm run check:env-sync` — assert lib/env.ts and .env.example agree
+- `npm run db:migrate` — apply forward-only SQL migrations (PLAN-03)
+- `npm run seed:maitre` — upsert MAITRE_EMAIL into employees (PLAN-03)
+- `npm run edge-config:seed` — seed Edge Config from edge-config/seed.json (PLAN-02)
+- `npm run smoke:kv` — Upstash Redis ping/round-trip (PLAN-02)
+- `npm run test:pg` — two-clients load test (PLAN-03)
 
-## Learn More
+## Environment variables
 
-To learn more about Next.js, take a look at the following resources:
+See `.env.example` for the full inventory. Every key listed there must be set in all 3 Vercel environments (production, preview, development) per Pitfall #18.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Project docs
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `.planning/PROJECT.md` — vision and constraints
+- `.planning/ROADMAP.md` — 4-phase plan
+- `.planning/REQUIREMENTS.md` — 32 v1 requirements
+- `CLAUDE.md` — code style, stack lock, conventions
