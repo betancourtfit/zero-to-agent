@@ -1,10 +1,13 @@
 ---
 phase: 3
 slug: user-surfaces
-status: draft
+status: approved
 shadcn_initialized: true
 preset: base-nova / neutral / Tailwind v4 / CSS variables
 created: 2026-04-26
+revised: 2026-04-26
+reviewed_at: 2026-04-26
+revision: 1
 ---
 
 # Phase 3 — UI Design Contract: User Surfaces
@@ -48,7 +51,7 @@ Declared values (multiples of 4, mapped to Tailwind v4 defaults):
 
 **Exceptions:**
 - Touch target minimum: 44px height on all action buttons (`Llamar`, `Marcar presentado`, `Reabrir`, quick-reply chips, chat submit). Use `min-h-[44px]` override where Tailwind default is smaller.
-- Connection dot indicator: 10px diameter (`w-2.5 h-2.5`), not on the 4px grid — smallest viable visual affordance.
+- Connection dot indicator: 8px diameter (`w-2 h-2`). On the 4px grid. Visually pairs well with the `text-xs` (12px) "en vivo" label. If 8px reads too small in a visual review, executor may use `w-3 h-3` (12px) — also on grid.
 - Left-border color band on queue cards: 4px (`border-l-4`) — on grid.
 
 ---
@@ -60,12 +63,11 @@ All sizes reference Tailwind v4 default scale (which maps to `rem` units). Expli
 | Role | Size | Weight | Line Height | Tailwind class | Usage |
 |------|------|--------|-------------|----------------|-------|
 | Body | 16px (`text-base`) | 400 (regular) | 1.5 | `text-base font-normal leading-normal` | Chat messages, card body text, form inputs, history table rows |
-| Label | 14px (`text-sm`) | 500 (medium) | 1.4 | `text-sm font-medium leading-snug` | Card field labels, badge text, status pills, connection dot label, ETA/position metadata |
+| Label | 14px (`text-sm`) | 400 (regular) | 1.4 | `text-sm font-normal leading-snug` | Card field labels, badge text, status pills, connection dot label, ETA/position metadata. Size (14px) differentiates Label from Body — no weight bump needed. |
 | Heading | 20px (`text-xl`) | 600 (semibold) | 1.2 | `text-xl font-semibold leading-tight` | Page H1 "Cola de Espera", panel section titles, card name field |
-| Display | 28px (`text-3xl`) | 700 (bold) | 1.1 | `text-3xl font-bold leading-none` | Push banner "TU MESA ESTÁ LISTA" — uppercase, single-line urgency copy only |
+| Display | 28px (`text-3xl`) | 600 (semibold) | 1.1 | `text-3xl font-semibold leading-none` | Push banner "TU MESA ESTÁ LISTA" — uppercase, single-line urgency copy only. 28px size + uppercase transform + colored banner background carry the urgency without a fourth weight tier. |
 
-**Weights in use:** regular (400) + medium (500) + semibold (600) + bold (700).
-**Justification for 4 weights:** bold is reserved exclusively for the "TU MESA ESTÁ LISTA" banner — the single highest-urgency message in the entire product. Every other element uses regular/medium/semibold. No weight is shared across contexts; each weight signals a distinct level of priority.
+**Weights in use:** regular (400) + semibold (600). Exactly 2 weights.
 
 **Font stack:** Geist Sans via `--font-sans` CSS variable (already set in `app/globals.css`). No additional font imports needed.
 
@@ -143,7 +145,7 @@ Card background stays `bg-card` (white/dark slate) — party color is never appl
 
 **Error state:** Network-level error banner above the composer (NOT in chat thread): `bg-destructive/10 text-destructive text-sm px-4 py-2 rounded` — "No pude contactar al servidor. Intentá de nuevo en un momento." Dismissable.
 
-**Confirmation badge:** Rendered inside assistant chat bubble ONLY when `tool-result part` contains `ok === true && data.reservation_id`. Markup: `<span class="inline-flex items-center gap-1 bg-green-50 text-green-700 text-xs font-medium px-2 py-0.5 rounded-full border border-green-200">✓ Reserva #{id.slice(0,8)}</span>`. Never rendered from LLM text alone. Source: CONTEXT.md D-03, Pitfall #16.
+**Confirmation badge:** Rendered inside assistant chat bubble ONLY when `tool-result part` contains `ok === true && data.reservation_id`. Markup: `<span class="inline-flex items-center gap-1 bg-green-50 text-green-700 text-xs font-normal px-2 py-0.5 rounded-full border border-green-200">✓ Reserva #{id.slice(0,8)}</span>`. Never rendered from LLM text alone. Source: CONTEXT.md D-03, Pitfall #16.
 
 ---
 
@@ -153,12 +155,12 @@ Card background stays `bg-card` (white/dark slate) — party color is never appl
 
 **Nav bar** (`h-12 border-b px-4 flex items-center justify-between`):
 - Left: "Panel de Maître" (`text-base font-semibold`)
-- Center: `Activas | Historial` tab links (shadcn `Tabs` or plain nav with `font-medium text-sm` active / `text-muted-foreground` inactive)
-- Right: Connection dot (10px circle) + "en vivo" / "reconectando" / "sin conexión" label (`text-xs text-muted-foreground`)
+- Center: `Activas | Historial` tab links (shadcn `Tabs` or plain nav with `font-normal text-sm` active / `text-muted-foreground` inactive)
+- Right: Connection dot (8px circle, `w-2 h-2`) + "en vivo" / "reconectando" / "sin conexión" label (`text-xs text-muted-foreground`)
 
 **Queue card anatomy** (`rounded-lg border bg-card shadow-sm border-l-4 p-4 flex flex-col gap-2`):
 - `border-l-4` color = `colors_by_party_size` inline style
-- **Top row:** party-size badge (color chip, `text-xs font-medium px-1.5 py-0.5 rounded`) + name (`text-base font-semibold truncate flex-1`) + extension badge ("extendido ×N" in `bg-orange-100 text-orange-700 text-xs rounded-full px-2`) if `extension_count > 0`
+- **Top row:** party-size badge (color chip, `text-xs font-normal px-1.5 py-0.5 rounded`) + name (`text-base font-semibold truncate flex-1`) + extension badge ("extendido ×N" in `bg-orange-100 text-orange-700 text-xs rounded-full px-2`) if `extension_count > 0`
 - **Middle row:** "Esperando hace X min" (`text-sm text-muted-foreground`) + "ETA Y min" (`text-sm`) + status pill (see color table above)
 - **Bottom row:** action buttons, `flex gap-2 mt-2`. Button rules:
   - `status === "waiting"`: `[Llamar]` button (`Button variant="default" size="sm" min-h-[44px]`). "Marcar presentado" is absent (not just disabled — do not render).
@@ -181,7 +183,7 @@ Card background stays `bg-card` (white/dark slate) — party color is never appl
 
 **Table columns:** Hora llegada | Nombre | Tamaño | Estado | Duración en cola | Acción
 
-**Table styling:** `w-full text-sm border-collapse`. Header row: `bg-muted text-muted-foreground font-medium`. Body rows: alternating `bg-background` / `bg-muted/30`. Row hover: `hover:bg-muted/50`.
+**Table styling:** `w-full text-sm border-collapse`. Header row: `bg-muted text-muted-foreground font-normal`. Body rows: alternating `bg-background` / `bg-muted/30`. Row hover: `hover:bg-muted/50`.
 
 **Status badges in table:** Same status pill system as queue cards (see color table above).
 
@@ -319,13 +321,13 @@ All user-facing copy is Spanish rioplatense (vos, never tú). Terse for maître;
 | Component | v0 prompt hint | Notes |
 |-----------|----------------|-------|
 | `components/chat/chat-thread.tsx` | "Chat message list, alternating left/right bubbles, right=user bg-primary, left=assistant bg-muted, body text 16px" | Manual cleanup after paste |
-| `components/chat/push-banner.tsx` | "Sticky top banner, hides when empty, shows urgency state with configurable background color and large bold uppercase text" | Include `aria-live="assertive"` |
+| `components/chat/push-banner.tsx` | "Sticky top banner, hides when empty, shows urgency state with configurable background color and large semibold uppercase text" | Include `aria-live="assertive"` |
 | `components/chat/quick-reply-chips.tsx` | "Horizontal scroll row of pill buttons, hidden by default, shows 2 short-text chips" | Can be collapsed into push-banner |
 | `components/chat/status-card.tsx` | "Compact status summary card, muted background, shows position number, ETA minutes, status string" | Visible only when session active |
 | `components/chat/chat-composer.tsx` | "Sticky bottom input + send button, disabled state, 44px min height button" | |
 | `components/queue/queue-card.tsx` | "Restaurant queue card with colored left border, party size badge, name, wait time, ETA, status pill, action button(s)" | Left border color via inline style |
 | `components/queue/history-table.tsx` | "Dense data table, 6 columns, row hover, status badge, single action button per row" | |
-| `components/queue/connection-dot.tsx` | "10px circle indicator dot, 3 color states: green connected, yellow reconnecting, red failed, with label text" | |
+| `components/queue/connection-dot.tsx` | "8px circle indicator dot (`w-2 h-2`), 3 color states: green connected, yellow reconnecting, red failed, with label text" | |
 
 ---
 
@@ -399,6 +401,7 @@ No third-party registries in Phase 3. All components from shadcn official or cus
 ---
 
 *UI-SPEC generated: 2026-04-26*
+*UI-SPEC revised: 2026-04-26 (revision 1 — typography collapsed to 2 weights; connection dot corrected to 8px grid)*
 *Phase: 3 — User Surfaces (diner chatbot + maître panel + history)*
 *Surfaces: `/` (chatbot), `/queue` (panel), `/queue/history` (history)*
 *Design system: shadcn base-nova / neutral / Tailwind v4 / Lucide / Geist Sans*
