@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: phase-complete
+status: ready_to_plan
 last_updated: "2026-04-26T12:05:00Z"
 progress:
   total_phases: 4
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 12
   completed_plans: 12
-  percent: 100
+  percent: 75
 ---
 
 # State: Zero to Agent — Restaurant Queue MVP
@@ -35,9 +35,9 @@ progress:
 Phase: 02 (backend-core) — COMPLETE
 Plan: 8 of 8 (DONE — phase closed)
 **Milestone:** v1 (hackathon MVP + pilot)
-**Phase:** 2 (closed) → next is Phase 3 (user-surfaces)
-**Plan:** 02-01..02-08 complete (all 8 Phase 2 plans shipped)
-**Status:** Phase 02 complete; ready for Phase 3 planning
+**Phase:** 3
+**Plan:** Not started
+**Status:** Ready to plan
 **Progress:** [██████████] 100% (12/12 plans across 2 completed phases of 4)
 
 **Next action:** Plan Phase 3 (User Surfaces). Prerequisites: Phase 0 prereqs (Resend domain — B1) must clear before STAFF-01 chatbot UI work; Skew Protection (B2) must clear before the live money-shot rehearsal. Neither blocks Phase 3 PLANNING — both block Phase 3 EXECUTION at specific tasks. The agent can run `/gsd-plan-phase 3` immediately. Phase 3 will consume Phase 2 artifacts UNCHANGED (no new contracts, no breaking changes): 4 MCP tools (02-05), 2 SSE endpoints (02-06), 4 staff endpoints (02-07), service layer (02-03), workflow (02-04 — FROZEN, only step bodies change), seed-demo + smoke tests (02-08).
