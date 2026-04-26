@@ -36,7 +36,7 @@ These are NOT a phase the agent runs. They are **blocking human work** that must
 ## Phases
 
 - [ ] **Phase 1: Foundation** — Empty Next.js 16 deployed to Vercel with DB, Auth.js magic-link, Edge Config, KV provisioned, env vars set in all environments
-- [ ] **Phase 2: Backend Core** — MCP server + service layer + WDK durable workflow + KV pub/sub + SSE handlers; money-shot smoke test passes (CRITICAL PATH)
+- [ ] **Phase 2: Backend Core** — MCP server + service layer + WDK durable workflow + KV pub/sub + SSE handlers; money-shot smoke test passes (CRITICAL PATH) — 1/8 plans done (02-01 spikes-skew)
 - [ ] **Phase 3: User Surfaces** — Chatbot embed (diner self-serve) + maître panel (queue + history + actions) + DurableAgent ETA, both surfaces real-time via SSE
 - [ ] **Phase 4: Pilot-Hardening + Demo** — Rate limiting, idempotency, monitoring, PII audit, smoke test script, demo video recording, README polish, final prod deploy
 
@@ -94,7 +94,17 @@ Plans:
   4. The `seed-demo.ts` script populates 3 reservations in distinct states (`waiting`, `called`, `seated`) and is used as the default dev fixture from this phase forward (NOT just at demo time)
   5. Workflow steps publish state-change events to Upstash Redis pub/sub channels (`reservation:<id>` and `queue:active`) and SSE Route Handlers (`/api/events/[reservation_id]`, `/api/events/queue`) emit a Postgres-snapshot event on connect followed by live KV events — verifiable by opening two `curl -N` SSE connections and triggering a state change
 
-**Plans:** TBD
+**Plans:** 8 (1 complete)
+
+Plans:
+- [x] 02-01-spikes-skew-PLAN.md — Skew Protection prereq + spike A (`using` keyword) + spike B (createHook buffering decision) + `withWorkflow` wired into next.config.ts + tsconfig workflow plugin + `lib/workflows/_README.md` freeze-shape rulebook (Wave 1, requirements: PLAT-03)
+- [ ] 02-02-log-redactor-PLAN.md
+- [ ] 02-03-service-layer-PLAN.md
+- [ ] 02-04-workflow-PLAN.md
+- [ ] 02-05-mcp-PLAN.md
+- [ ] 02-06-sse-PLAN.md
+- [ ] 02-07-staff-api-PLAN.md
+- [ ] 02-08-smoke-PLAN.md
 
 **Pitfalls addressed in this phase:**
 - #1 Side effects outside `"use step"` (workflow function is a router, not a worker — establish in `lib/workflows/_README.md`)
@@ -108,8 +118,8 @@ Plans:
 - #16 Tool error contract designed (no fake-success — error response shape is `{ error: CODE, message: string }`; UI confirmation rule for Phase 3)
 
 **Required spikes (from research §5 flags):**
-- 30-min spike at top of Phase 2: verify `using` keyword (TS 5.2+ explicit resource management) compiles + executes on Vercel's Node 20 runtime with the WDK compiler. Fallback: manual `try/finally` with `hook.dispose()`
-- Verify whether `createHook()` buffers events fired before subscribe. If NO → DB-backed safety net is mandatory; if YES → belt-and-suspenders
+- 30-min spike at top of Phase 2: verify `using` keyword (TS 5.2+ explicit resource management) compiles + executes on Vercel's Node 20 runtime with the WDK compiler. Fallback: manual `try/finally` with `hook.dispose()` — **DONE in plan 02-01: PASS on Node 20.19.4**
+- Verify whether `createHook()` buffers events fired before subscribe. If NO → DB-backed safety net is mandatory; if YES → belt-and-suspenders — **DONE in plan 02-01: ASSUMED NON-BUFFERING (pessimistic); D-10 is mandatory primary delivery path**
 
 ---
 
@@ -173,8 +183,8 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 0/TBD | Not started | - |
-| 2. Backend Core | 0/TBD | Not started | - |
+| 1. Foundation | 4/4 | Done | 2026-04-25 |
+| 2. Backend Core | 1/8 | Executing | - |
 | 3. User Surfaces | 0/TBD | Not started | - |
 | 4. Pilot-Hardening + Demo | 0/TBD | Not started | - |
 
@@ -244,8 +254,8 @@ In order of "cut first":
 
 | # | Question | Phase | Where to resolve |
 |---|----------|-------|------------------|
-| 1 | Does TS 5.2+ `using` keyword compile + run on Vercel's Node 20 runtime with WDK? | 2 | 30-min spike at top of Phase 2 |
-| 2 | Does `createHook()` buffer events fired before subscribe? | 2 | Spike before committing safety net depth |
+| 1 | Does TS 5.2+ `using` keyword compile + run on Vercel's Node 20 runtime with WDK? | 2 | RESOLVED in plan 02-01: PASS on Node 20.19.4 |
+| 2 | Does `createHook()` buffer events fired before subscribe? | 2 | RESOLVED in plan 02-01: ASSUMED NON-BUFFERING (pessimistic) → D-10 mandatory |
 | 3 | Skip MCP-over-HTTP roundtrip from `/api/chat` and call services directly? | 3 | `/gsd-plan-phase 3` |
 | 4 | DurableAgent ETA quality vs deterministic formula | 3 | Cap at 4h, decide based on dry-run output |
 | 5 | Pro vs Hobby plan for pilot (Hobby caps SSE at 300s, Pro 800s) | 4 | Decide before final prod deploy |
@@ -254,4 +264,4 @@ In order of "cut first":
 
 ---
 
-*Last updated: 2026-04-25 after initial roadmap creation*
+*Last updated: 2026-04-26 after plan 02-01-spikes-skew completion*

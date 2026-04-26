@@ -2,19 +2,19 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: ready_to_plan
-last_updated: "2026-04-26T01:51:05.560Z"
+status: executing
+last_updated: "2026-04-26T06:08:09.949Z"
 progress:
   total_phases: 4
   completed_phases: 1
-  total_plans: 4
-  completed_plans: 0
-  percent: 25
+  total_plans: 12
+  completed_plans: 5
+  percent: 42
 ---
 
 # State: Zero to Agent — Restaurant Queue MVP
 
-**Last updated:** 2026-04-25 after Phase 1 context gathering (`/gsd-discuss-phase 1`)
+**Last updated:** 2026-04-26 after plan 02-01-spikes-skew completion
 
 ---
 
@@ -22,7 +22,7 @@ progress:
 
 **Core value:** Una reserva entra al chatbot, sobrevive deploys/crashes/timers como workflow durable, y se cierra correctamente (`seated`, `no_show` o `cancelled`) sin perder estado.
 
-**Current focus:** Phase 01 — foundation
+**Current focus:** Phase 02 — backend-core
 
 **Hackathon deadline:** ~2026-05-02 (~7 days from 2026-04-25)
 **Pilot start:** Same week as hackathon — real diners, real PII, real correctness requirements
@@ -32,15 +32,15 @@ progress:
 
 ## Current Position
 
-Phase: 01 (foundation) — EXECUTING
-Plan: 1 of 4
+Phase: 02 (backend-core) — EXECUTING
+Plan: 2 of 8 (next: 02-02-log-redactor)
 **Milestone:** v1 (hackathon MVP + pilot)
 **Phase:** 2
-**Plan:** Not started
-**Status:** Ready to plan
-**Progress:** [░░░░░░░░░░░░░░░░░░░░] 0% (0/4 phases complete)
+**Plan:** 02-01 complete; 02-02 ready to execute
+**Status:** Executing Phase 02
+**Progress:** [████░░░░░░] 42%
 
-**Next action:** Run `/gsd-plan-phase 1` to decompose Phase 1 into executable plans. Phase 0 prereqs (especially Resend domain verification) still gate the auth subtask.
+**Next action:** Confirm Skew Protection enabled in the Vercel dashboard (deferred from plan 02-01 Task 1; see 02-01-spikes-skew-SUMMARY.md §"User Setup Required"), then proceed to plan 02-02 (log-redactor). The workflow SDK is wired and the freeze-shape rulebook (`lib/workflows/_README.md`) is published — plan 02-04 (workflow code) is unblocked once Skew Protection is confirmed.
 
 ---
 
@@ -59,11 +59,15 @@ Plan: 1 of 4
 
 ## Performance Metrics
 
-**Plans completed:** 0
+**Plans completed:** 5 (Phase 1: 4 plans + Phase 2: 1 plan)
 **Plans repaired:** 0
-**Phases completed:** 0
-**Cycles per plan (avg):** N/A
+**Phases completed:** 1 (Phase 1 — Foundation)
+**Cycles per plan (avg):** 1.0
 **Time per phase (avg):** N/A
+
+| Plan | Duration | Tasks | Files |
+|------|----------|-------|-------|
+| Phase 02-backend-core P01 (spikes-skew) | 7m | 5 (4 atomic + 1 auto-fix) | 7 |
 
 ---
 
@@ -86,6 +90,9 @@ Plan: 1 of 4
 | Money-shot smoke test pulled into Phase 2 (not Phase 4) | Architecture §Build Order | Find money-shot broken in Phase 2 = time to fix; in Phase 4 = project killer |
 | seed-demo script built in Phase 2 (not Phase 4) | Pitfall #20 | Used as default dev fixture from day one, not just demo |
 | DurableAgent ETA capped at 4h; fall back to deterministic formula wrapped in `@workflow/ai/agent` | Cut list #1 | Preserve Track 2 narrative even if agent doesn't deliver visible value |
+| Spike A PASS on Node 20.19.4 — `using hook = createHook(...)` cleared in `reservation.ts` | Plan 02-01 Spike A | Manual `try/finally` is fallback only |
+| Spike B treated as NON-BUFFERING (pessimistic); D-10 DB-backed safety net is mandatory primary delivery path | Plan 02-01 Spike B | Safer failure mode for hackathon demo + same-week pilot |
+| Workflow SDK wired into Next.js build via `withWorkflow()` from `workflow/next` | Plan 02-01 Task 2 | Phase 2 prerequisite for plan 02-04 |
 
 ### Pending Todos
 
@@ -100,6 +107,7 @@ Plan: 1 of 4
 | # | Blocker | Owner | Resolution Path |
 |---|---------|-------|-----------------|
 | B1 | Resend domain DNS propagation (0–48h) | Human (user) | Buy domain if needed (~$10), add SPF+DKIM+DMARC, wait for "verified" status in Resend dashboard |
+| B2 | Vercel Skew Protection NOT confirmed enabled | Human (user) | Vercel Dashboard → Project → Settings → Skew Protection → Enable. Soft-blocks plan 02-04 (workflow code) and hard-blocks plan 02-08 (money-shot smoke). Deferred from plan 02-01 Task 1 — agent cannot click dashboard toggles. |
 
 ### Key Files
 
@@ -127,13 +135,13 @@ Plan: 1 of 4
 
 ## Session Continuity
 
-**Previous session ended:** 2026-04-25 after `/gsd-new-project` orchestrator created PROJECT.md, REQUIREMENTS.md, research/*, and now ROADMAP.md + STATE.md.
+**Previous session ended:** 2026-04-26 after plan 02-01-spikes-skew completion. Workflow SDK wired into Next.js build, both spikes recorded, `lib/workflows/_README.md` freeze-shape rulebook published.
 
 **Next session should:**
 
-1. Verify Phase 0 prerequisites complete (especially Resend domain "verified" in dashboard)
-2. Run `/gsd-plan-phase 1` to decompose Phase 1 (Foundation) into executable plans
-3. Phase 1 plans should account for: Resend gate on STAFF-01 subtask; two pg clients (Pool for Auth + serverless for app); Auth.js v5 split config; pooled vs non-pooled Postgres URL discipline
+1. Confirm Skew Protection is enabled in the Vercel dashboard (B2 above) — gates plan 02-04 (workflow) and plan 02-08 (money-shot).
+2. Proceed to plan 02-02 (log-redactor — `lib/log.ts` + redactPII helper, SAFE-01).
+3. Plans 02-02 and 02-03 are dashboard-independent and can land in parallel with the user resolving B2.
 
 **If returning after long gap:**
 
@@ -146,3 +154,5 @@ Plan: 1 of 4
 *State initialized: 2026-04-25 after roadmap creation*
 
 **Planned Phase:** 1 (Foundation) — 4 plans — 2026-04-26T01:47:31.899Z
+
+**Last completed plan:** 02-01-spikes-skew — 2026-04-26 — commits be77a72, e4170f2, 223a04d, aa6ab70, c39a107
