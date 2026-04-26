@@ -56,7 +56,7 @@ Requirements for the hackathon MVP and the same-week pilot. Every requirement ma
 - [ ] **DEMO-01**: Deploy productivo en Vercel con URL pública estable
 - [ ] **DEMO-02**: Repo público en GitHub con código limpio + `.env.example` actualizado + README claro (descripción, stack, cómo correr local, link al deploy)
 - [ ] **DEMO-03**: Video demo de 90 segundos cubriendo los 6 escenarios: (1) alta conversacional, (2) vuelta del comensal con estado preservado, (3) llamado + extensión proactiva via chat, (4) no-show automático, (5) Edge Config en vivo, (6) money shot del deploy con tickets vivos sobreviviendo. (Si rehearsal de Edge Config sale mal, escenario 5 se puede recortar — pero los demás son no-cuttable)
-- [ ] **DEMO-04**: Script `scripts/seed-demo.ts` crea 3 reservas en distintos estados para que la grabación arranque con la cola "viva"; usado durante desarrollo (no solo en Phase 4) para tener app real funcionando todos los días
+- [x] **DEMO-04**: Script `scripts/seed-demo.ts` crea 3 reservas en distintos estados para que la grabación arranque con la cola "viva"; usado durante desarrollo (no solo en Phase 4) para tener app real funcionando todos los días — shipped in plan 02-08 alongside `scripts/smoke-test-mcp.sh` + `scripts/smoke-money-shot.sh` + `npm run dev:reset`
 
 ## v2 Requirements
 
@@ -148,7 +148,7 @@ Each v1 requirement maps to exactly one phase. See `ROADMAP.md` for phase defini
 | DEMO-01 | Phase 1 | Pending |
 | DEMO-02 | Phase 1 | Pending |
 | DEMO-03 | Phase 4 | Pending |
-| DEMO-04 | Phase 2 | Pending |
+| DEMO-04 | Phase 2 | Done — plan 02-08 |
 
 **Coverage:**
 - v1 requirements: 32 total

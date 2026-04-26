@@ -2,19 +2,19 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-last_updated: "2026-04-26T11:51:47.655Z"
+status: phase-complete
+last_updated: "2026-04-26T12:05:00Z"
 progress:
   total_phases: 4
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 12
-  completed_plans: 11
-  percent: 92
+  completed_plans: 12
+  percent: 100
 ---
 
 # State: Zero to Agent — Restaurant Queue MVP
 
-**Last updated:** 2026-04-26 after plan 02-07-staff-api completion
+**Last updated:** 2026-04-26 after plan 02-08-smoke completion (Phase 2 closed)
 
 ---
 
@@ -22,7 +22,7 @@ progress:
 
 **Core value:** Una reserva entra al chatbot, sobrevive deploys/crashes/timers como workflow durable, y se cierra correctamente (`seated`, `no_show` o `cancelled`) sin perder estado.
 
-**Current focus:** Phase 02 — backend-core
+**Current focus:** Phase 02 (backend-core) CLOSED. Next: Phase 03 (user-surfaces) planning.
 
 **Hackathon deadline:** ~2026-05-02 (~7 days from 2026-04-25)
 **Pilot start:** Same week as hackathon — real diners, real PII, real correctness requirements
@@ -32,17 +32,17 @@ progress:
 
 ## Current Position
 
-Phase: 02 (backend-core) — EXECUTING
-Plan: 8 of 8 (next: 02-08-smoke)
+Phase: 02 (backend-core) — COMPLETE
+Plan: 8 of 8 (DONE — phase closed)
 **Milestone:** v1 (hackathon MVP + pilot)
-**Phase:** 2
-**Plan:** 02-01..02-07 complete; 02-08 next (final Phase 2 plan)
-**Status:** Executing Phase 02
-**Progress:** [█████████░] 92%
+**Phase:** 2 (closed) → next is Phase 3 (user-surfaces)
+**Plan:** 02-01..02-08 complete (all 8 Phase 2 plans shipped)
+**Status:** Phase 02 complete; ready for Phase 3 planning
+**Progress:** [██████████] 100% (12/12 plans across 2 completed phases of 4)
 
-**Next action:** Plan 02-08 (money-shot smoke test) is the final Phase 2 plan. It HARD-blocks on B2 (Skew Protection) — the user must click Vercel Dashboard → Settings → Skew Protection → Enable before the rehearsal. This is the rehearsal of the money-shot demo: create 2 reservations via MCP, sleep 3s, manually `git push` to redeploy, assert in-flight reservations resume via SSE post-deploy. After 02-08 lands, Phase 2 closes and Phase 3 (User Surfaces) becomes the next phase.
+**Next action:** Plan Phase 3 (User Surfaces). Prerequisites: Phase 0 prereqs (Resend domain — B1) must clear before STAFF-01 chatbot UI work; Skew Protection (B2) must clear before the live money-shot rehearsal. Neither blocks Phase 3 PLANNING — both block Phase 3 EXECUTION at specific tasks. The agent can run `/gsd-plan-phase 3` immediately. Phase 3 will consume Phase 2 artifacts UNCHANGED (no new contracts, no breaking changes): 4 MCP tools (02-05), 2 SSE endpoints (02-06), 4 staff endpoints (02-07), service layer (02-03), workflow (02-04 — FROZEN, only step bodies change), seed-demo + smoke tests (02-08).
 
-After plan 02-07, `npm run build` reports `Created manifest with 14 steps, 1 workflow, and 0 classes` — workflow count preserved (these routes consume the workflow indirectly via `lib/services/queue.ts → resumeHook(...)` but do not import the workflow file directly). All four staff action endpoints are live in the route table: `/api/queue` (GET), `/api/queue/[id]/call` (POST), `/api/queue/[id]/seated` (POST), `/api/queue/[id]/no_show_manual` (POST).
+After plan 02-08, `npm run build` route table includes all 14 routes (3 workflow internal `/.well-known/workflow/v1/*`, 4 staff action `/api/queue*`, 2 SSE `/api/events/*`, 1 MCP `/mcp/[transport]`, 1 auth `/api/auth/[...nextauth]`, 3 pages `/`, `/login`, `/queue`). Three new scripts ship: `scripts/seed-demo.ts` (3-state idempotent dev fixture), `scripts/smoke-test-mcp.sh` (5-step end-to-end MCP smoke), `scripts/smoke-money-shot.sh` (deploy-mid-flight rehearsal harness with --dry-run). Plus `npm run dev:reset` (db:migrate + seed:demo composite). DEMO-04 ships with this plan.
 
 ---
 
@@ -50,20 +50,20 @@ After plan 02-07, `npm run build` reports `Created manifest with 14 steps, 1 wor
 
 | Phase | Status | Plans | Requirements | Complete |
 |-------|--------|-------|--------------|----------|
-| 1 — Foundation | Context captured | 0/TBD | 5 | - |
-| 2 — Backend Core | Not started | 0/TBD | 7 | - |
-| 3 — User Surfaces | Not started | 0/TBD | 19 | - |
-| 4 — Pilot-Hardening + Demo | Not started | 0/TBD | 1 | - |
+| 1 — Foundation | Complete | 4/4 | 5 | 5/5 |
+| 2 — Backend Core | Complete | 8/8 | 7 | 7/7 |
+| 3 — User Surfaces | Not started | 0/TBD | 19 | 0/19 |
+| 4 — Pilot-Hardening + Demo | Not started | 0/TBD | 1 | 0/1 |
 
-**Overall:** 32/32 v1 requirements mapped. 0/32 complete.
+**Overall:** 32/32 v1 requirements mapped. 12/32 complete (Phase 1: 5; Phase 2: 7).
 
 ---
 
 ## Performance Metrics
 
-**Plans completed:** 11 (Phase 1: 4 plans + Phase 2: 7 plans — through 02-07-staff-api)
+**Plans completed:** 12 (Phase 1: 4 plans + Phase 2: 8 plans — through 02-08-smoke)
 **Plans repaired:** 0
-**Phases completed:** 1 (Phase 1 — Foundation)
+**Phases completed:** 2 (Phase 1 — Foundation; Phase 2 — Backend Core)
 **Cycles per plan (avg):** 1.0
 **Time per phase (avg):** N/A
 
@@ -75,6 +75,7 @@ After plan 02-07, `npm run build` reports `Created manifest with 14 steps, 1 wor
 | Phase 02-backend-core P04 (workflow) | 7m | 2 atomic tasks | 3 files |
 | Phase 02-backend-core P06 (sse) | 5m | 2 atomic tasks | 2 files |
 | Phase 02-backend-core P07 (staff-api) | 3m | 4 atomic tasks | 4 files |
+| Phase 02-backend-core P08 (smoke) | 5m | 4 atomic tasks | 4 files (3 created + 1 modified) |
 
 ---
 
@@ -119,6 +120,10 @@ After plan 02-07, `npm run build` reports `Created manifest with 14 steps, 1 wor
 | Next.js 16 dynamic route params is `Promise<{...}>` and must be awaited inside route handlers | Plan 02-06 deviation #4 (Rule 3) | All future dynamic-segment routes in this repo follow this pattern (already true of `mcp/[transport]/route.ts` indirectly via mcp-handler) |
 | All four staff action API endpoints (GET /api/queue + POST /api/queue/[id]/{call,seated,no_show_manual}) ship as 5–15 line wrappers around `lib/services/queue.ts` — strict ARCHITECTURE §3.1 service-layer funnel adherence; zero SQL/business logic in routes (only the auth-gate `employees` lookup). Plan task 4 pseudocode for inline DB+KV+resumeHook in no_show_manual was superseded by service's `markNoShowManual()` (added in plan 02-03 deviation #2 specifically to back this endpoint) | Plan 02-07 task 4 deviation (Rule 4 architectural alignment) | Phase 3 panel calls these endpoints unchanged; future WhatsApp adapter (post-v1) reuses the same service functions |
 | Staff route HTTP status mapping: 401 (no session), 403 (signed-in but inactive employee), 404 (RESERVATION_NOT_FOUND), 409 (state-conflict codes RESERVATION_ALREADY_CLOSED/NOT_IN_*), 400 (INVALID_INPUT/INVALID_SESSION), 500 (default). 401 vs 403 distinction lets the Phase 3 panel route /login vs cuenta-desactivada-screen separately. `statusForErrorCode()` switch is duplicated across the 3 POST routes intentionally — short, drift-resistant via grep, no shared helper file | Plan 02-07 implementation refinement | Phase 3 panel UX maps result.error.code → user-visible Spanish copy without parsing message strings |
+| `seed-demo.ts` uses the REAL service layer (`createReservation` + `markCalled` + `markSeated`) — workflows are LIVE on every dev reset (D-32). NOT a Phase 4-only artifact (Pitfall #20): this IS the daily dev fixture. Idempotency boundary: `email LIKE 'demo%@example.test'` filter on DELETE — real diner data is untouched | Plan 02-08 task 1 | Every developer reset uses this from Phase 2 forward; the chatbot/panel work in Phase 3 starts every dev session against 3 known-good reservations across waiting/called/seated |
+| `smoke-test-mcp.sh` MCP endpoint URL is `POST /mcp/mcp` (not `POST /mcp`). With `mcp-handler` `basePath: "/mcp"` and the route file at `app/mcp/[transport]/route.ts`, the streamable-HTTP endpoint requires the `[transport]` segment. Verified against `node_modules/mcp-handler/README.md` quick-start. Both shell smoke scripts also send `Accept: application/json, text/event-stream` per MCP spec — without it, mcp-handler returns 406 | Plan 02-08 task 2 deviation #2/#3 (Rule 3) | Future curl-based smoke scripts and any external MCP client integration documentation must use the `/mcp/mcp` URL shape |
+| `smoke-money-shot.sh` ships with `--dry-run` flag (orchestrator scope clarification). Skew Protection (B2) is NOT a blocker for AUTHORING the script — only for the actual rehearsal. Dry-run skips the deploy gate so script logic + env wiring + SSE polling can be smoke-tested standalone; full rehearsal requires (a) Skew Protection enabled in Vercel dashboard, (b) BASE_URL pointing at a real prod URL, (c) MCP_API_KEY matching the prod env var. All three documented in script header AND runtime banner | Plan 02-08 task 3 deviation #4 (Rule 2) | The script can be re-validated cheaply between deploys via `--dry-run`; the real rehearsal cost is paid only when actually deploying |
+| Phase 2 closure: 8 plans complete, 7 requirements shipped (PLAT-01, PLAT-02, PLAT-03, PLAT-05, PLAT-07, SAFE-01, DEMO-04). Workflow shape is now FROZEN per D-11 / Pitfall #4 — only step bodies may change in Phase 3+. Phase 3 (User Surfaces) consumes Phase 2 artifacts UNCHANGED: 4 MCP tools, 2 SSE endpoints, 4 staff endpoints, service layer, workflow router, seed-demo + smoke harness | Plan 02-08 closeout | Phase 3 plans must NOT touch `lib/workflows/reservation.ts` step count/order; can ONLY change step bodies (e.g., swap deterministic ETA for `@workflow/ai/agent`-wrapped DurableAgent) |
 
 ### Pending Todos
 
@@ -133,7 +138,7 @@ After plan 02-07, `npm run build` reports `Created manifest with 14 steps, 1 wor
 | # | Blocker | Owner | Resolution Path |
 |---|---------|-------|-----------------|
 | B1 | Resend domain DNS propagation (0–48h) | Human (user) | Buy domain if needed (~$10), add SPF+DKIM+DMARC, wait for "verified" status in Resend dashboard |
-| B2 | Vercel Skew Protection NOT confirmed enabled | Human (user) | Vercel Dashboard → Project → Settings → Skew Protection → Enable. HARD-blocks ONLY plan 02-08 (money-shot smoke rehearsal). Originally thought to also block 02-04 — corrected during 02-04 execution: Skew Protection is a deploy-time concern that affects in-flight workflow runs across deploys, not local code or type checks. Plans 02-04, 02-05, 02-06, 02-07 are all unblocked. 02-08 still needs B2 toggled before money-shot rehearsal. Agent cannot click dashboard toggles. |
+| B2 | Vercel Skew Protection NOT confirmed enabled | Human (user) | Vercel Dashboard → Project → Settings → Skew Protection → Enable. Plan 02-08 AUTHORED the smoke-money-shot.sh harness with a `--dry-run` flag (per orchestrator scope clarification) — script logic + env wiring is validated; the LIVE rehearsal still requires B2. After B2 is toggled and a stable prod URL exists, run `BASE_URL=https://<prod-url> npm run smoke:money-shot` to perform the actual rehearsal. Live rehearsal is not a Phase 3 prereq (the chatbot/panel work consumes Phase 2 artifacts unchanged); it IS a Phase 4 demo prereq. Agent cannot click dashboard toggles. |
 
 ### Key Files
 
@@ -161,13 +166,14 @@ After plan 02-07, `npm run build` reports `Created manifest with 14 steps, 1 wor
 
 ## Session Continuity
 
-**Previous session ended:** 2026-04-26 after plan 02-07-staff-api completion. Four staff action API endpoints shipped, all auth-gated thin wrappers around `lib/services/queue.ts`: `app/api/queue/route.ts` (GET active queue, 57 LOC), `app/api/queue/[id]/call/route.ts` (POST markCalled, 95 LOC), `app/api/queue/[id]/seated/route.ts` (POST markSeated, 87 LOC), `app/api/queue/[id]/no_show_manual/route.ts` (POST markNoShowManual, 95 LOC). All four copy the auth pattern from `app/api/events/queue/route.ts` — `auth()` session check + `employees.active` lookup by email + 401/403 error responses. ServiceResult error codes mapped to HTTP status (404/409/400/500). One Rule 4 architectural deviation: plan task 4 specified inline DB+KV+resumeHook for no_show_manual, but service layer's `markNoShowManual()` (added in plan 02-03 deviation #2) already covers this — wrapped service instead to preserve §3.1 funnel. Build manifest still reports `1 workflow`. PLAT-01 + PLAT-03 complete via this plan.
+**Previous session ended:** 2026-04-26 after plan 02-08-smoke completion (Phase 2 CLOSED). Three new scripts and one composite npm script shipped: `scripts/seed-demo.ts` (160 LOC) creates Demo Comensal 1/2/3 in waiting/called/seated states via the real service layer (workflows LIVE every dev reset, D-32; idempotent on `email LIKE 'demo%@example.test'`); `scripts/smoke-test-mcp.sh` (209 LOC) runs a 5-step end-to-end MCP test (create OK → action tools INVALID_SESSION without header → get_status OK with header → cancel closes the smoke fixture) using bearer auth + `Accept: application/json, text/event-stream` against `POST /mcp/mcp`; `scripts/smoke-money-shot.sh` (264 LOC) implements D-31 deploy-mid-flight rehearsal with `--dry-run` flag and `SKIP_DEPLOY_PROMPT=1` for CI; `npm run dev:reset` composes `db:migrate` + `seed:demo` for daily local resets. DEMO-04 complete via this plan. Phase 2 ends with 8/8 plans done, 7/7 phase requirements shipped, workflow shape FROZEN per D-11. Live money-shot rehearsal still pending — Skew Protection (B2) toggle + stable prod URL needed; the harness is ready.
 
 **Next session should:**
 
-1. Run plan 02-08 (money-shot smoke test) — the final Phase 2 plan. **HARD-blocked on B2** (Skew Protection in Vercel dashboard). Before running 02-08, the user must click Vercel Dashboard → Project → Settings → Skew Protection → Enable. After B2 clears, the plan creates 2 reservations via MCP, sleeps 3s, prompts the user to `git push` (manual gesture), then polls `/api/events/<id>?session_token=...` for 60s asserting both reservations show post-deploy SSE activity.
-2. After plan 02-08 lands and `npm run smoke:money-shot` passes against production, Phase 2 closes. Phase 3 (User Surfaces) becomes the next phase — chatbot UI + maître panel — and consumes the 4 staff action endpoints (this plan) + 2 SSE endpoints (plan 02-06) + 4 MCP tools (plan 02-05) + service layer (plan 02-03) UNCHANGED.
-3. Phase 3 panel REST contract is now locked: first-paint via `GET /api/queue`, live updates via `/api/events/queue` SSE, action buttons hit `POST /api/queue/<id>/{call,seated,no_show_manual}`. Error UX inspects `result.error.code` (not just HTTP status) — codes are stable across MCP + service + REST.
+1. **Plan Phase 3 (User Surfaces).** Run `/gsd-plan-phase 3`. Phase 3 plans the chatbot embed (DINER-01..08), the maître panel (STAFF-02..09), and DurableAgent ETA (PLAT-08), plus SAFE-02 (rate limit on diner side) and SAFE-03 (Spanish empathic copy). 19 requirements total. Phase 3 has a UI hint (use `v0` + shadcn/ui per stack lock) and a required spike (AI SDK v6 `useChat` + `DefaultChatTransport` + `sendMessage({text})` lifecycle, 10 sample conversations).
+2. **Phase 3 consumes Phase 2 artifacts UNCHANGED.** Hard contract: 4 MCP tools (chatbot calls via experimental_createMCPClient or — better per D-36 — calls services DIRECTLY in the `/api/chat` route), 2 SSE endpoints (panel queue list + diner per-reservation), 4 staff REST endpoints (panel action buttons), `lib/workflows/reservation.ts` (FROZEN — only step bodies may change; e.g., wrap `recompute_eta` step body in `@workflow/ai/agent` for DurableAgent without touching the step boundary), `seed-demo.ts` as the daily fixture.
+3. **B2 (Skew Protection) must be toggled before the live money-shot rehearsal.** This does NOT block Phase 3 planning OR execution. It DOES block Phase 4 demo prep — the demo video's "money shot" scenario needs to be rehearsable end-to-end on a real prod URL.
+4. **Run the smoke harness manually before Phase 3 starts** to confirm the local dev environment is healthy: `npm run dev` in one terminal, then `npm run dev:reset && npm run smoke:mcp && npm run smoke:money-shot -- --dry-run` in another. Expected: all green. Documented in `.planning/phases/02-backend-core/02-08-smoke-SUMMARY.md` under "Manual Rehearsal Procedure".
 
 **If returning after long gap:**
 
@@ -192,3 +198,7 @@ After plan 02-07, `npm run build` reports `Created manifest with 14 steps, 1 wor
 **Last completed plan:** 02-06-sse — 2026-04-26 — commits 855c737, 15ad508
 
 **Last completed plan:** 02-07-staff-api — 2026-04-26 — commits ea32967, 415b0cc, 59e4d28, d62dc5d
+
+**Last completed plan:** 02-08-smoke — 2026-04-26 — commits 1fcf33d, a07f084, d369897, c5555df
+
+**Phase 2 closeout:** 2026-04-26 — 8/8 plans done; 7/7 phase requirements shipped (PLAT-01, PLAT-02, PLAT-03, PLAT-05, PLAT-07, SAFE-01, DEMO-04). Workflow FROZEN per D-11 / Pitfall #4. Phase 3 unblocked.

@@ -36,7 +36,7 @@ These are NOT a phase the agent runs. They are **blocking human work** that must
 ## Phases
 
 - [ ] **Phase 1: Foundation** — Empty Next.js 16 deployed to Vercel with DB, Auth.js magic-link, Edge Config, KV provisioned, env vars set in all environments
-- [ ] **Phase 2: Backend Core** — MCP server + service layer + WDK durable workflow + KV pub/sub + SSE handlers; money-shot smoke test passes (CRITICAL PATH) — 7/8 plans done (02-01 spikes-skew, 02-02 log-redactor, 02-03 service-layer, 02-04 workflow, 02-05 mcp, 02-06 sse, 02-07 staff-api)
+- [x] **Phase 2: Backend Core** — MCP server + service layer + WDK durable workflow + KV pub/sub + SSE handlers; money-shot smoke test rehearsal harness shipped (CRITICAL PATH) — 8/8 plans done (02-01 spikes-skew, 02-02 log-redactor, 02-03 service-layer, 02-04 workflow, 02-05 mcp, 02-06 sse, 02-07 staff-api, 02-08 smoke). Live money-shot rehearsal still requires Skew Protection (B2) toggled and a prod deploy.
 - [ ] **Phase 3: User Surfaces** — Chatbot embed (diner self-serve) + maître panel (queue + history + actions) + DurableAgent ETA, both surfaces real-time via SSE
 - [ ] **Phase 4: Pilot-Hardening + Demo** — Rate limiting, idempotency, monitoring, PII audit, smoke test script, demo video recording, README polish, final prod deploy
 
@@ -94,7 +94,7 @@ Plans:
   4. The `seed-demo.ts` script populates 3 reservations in distinct states (`waiting`, `called`, `seated`) and is used as the default dev fixture from this phase forward (NOT just at demo time)
   5. Workflow steps publish state-change events to Upstash Redis pub/sub channels (`reservation:<id>` and `queue:active`) and SSE Route Handlers (`/api/events/[reservation_id]`, `/api/events/queue`) emit a Postgres-snapshot event on connect followed by live KV events — verifiable by opening two `curl -N` SSE connections and triggering a state change
 
-**Plans:** 8 (5 complete)
+**Plans:** 8 (8 complete — phase done; live money-shot rehearsal still pending Skew Protection toggle + prod deploy by user)
 
 Plans:
 - [x] 02-01-spikes-skew-PLAN.md — Skew Protection prereq + spike A (`using` keyword) + spike B (createHook buffering decision) + `withWorkflow` wired into next.config.ts + tsconfig workflow plugin + `lib/workflows/_README.md` freeze-shape rulebook (Wave 1, requirements: PLAT-03)
@@ -104,7 +104,7 @@ Plans:
 - [x] 02-05-mcp-PLAN.md — MCP server route at `app/mcp/[transport]/route.ts` with 4 tools (`create_reservation`, `get_reservation_status`, `extend_wait`, `cancel_reservation`) + `lib/mcp/auth.ts` (constant-time bearer verify + session resolution); ships PLAT-02 (Wave 1, requirements: PLAT-02)
 - [x] 02-06-sse-PLAN.md — SSE Route Handlers (`/api/events/[reservation_id]` diner + `/api/events/queue` staff) with Pattern 3 snapshot-replay-on-connect, Last-Event-ID gap recovery, abort cleanup; ships PLAT-07 (Wave 2, requirements: PLAT-07)
 - [x] 02-07-staff-api-PLAN.md — Staff action API endpoints (GET `/api/queue` + POST `/api/queue/[id]/{call,seated,no_show_manual}`) as 5–15 LOC wrappers around `lib/services/queue.ts`; ships PLAT-01 + PLAT-03 staff surface (Wave 2, requirements: PLAT-01, PLAT-03)
-- [ ] 02-08-smoke-PLAN.md
+- [x] 02-08-smoke-PLAN.md — `scripts/seed-demo.ts` (3-state idempotent dev fixture via real service layer) + `scripts/smoke-test-mcp.sh` (5-step end-to-end MCP test, all 4 tools, bearer auth) + `scripts/smoke-money-shot.sh` (deploy-mid-flight rehearsal harness with --dry-run) + `npm run dev:reset` composite; ships DEMO-04 (Wave 1, requirements: DEMO-04)
 
 **Pitfalls addressed in this phase:**
 - #1 Side effects outside `"use step"` (workflow function is a router, not a worker — establish in `lib/workflows/_README.md`)
