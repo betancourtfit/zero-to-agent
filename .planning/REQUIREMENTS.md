@@ -11,8 +11,10 @@ Requirements for the hackathon MVP and the same-week pilot. Every requirement ma
 
 - [ ] **DINER-01**: Comensal puede registrarse en la cola conversando con el chatbot embebido en `/`, proporcionando nombre, email, teléfono y cantidad de personas
 - [ ] **DINER-02**: Comensal recibe confirmación con `reservation_id`, posición en la cola y ETA estimada al completar el alta
-- [ ] **DINER-03**: Comensal recibe push proactivo "TU MESA ESTÁ LISTA" en la pestaña abierta cuando el maître ejecuta la acción "Llamar"
-- [ ] **DINER-04**: Comensal recibe follow-up automático ("¿Estás en camino? [Pedir más tiempo] [Cancelar]") al transcurrir `followup_after_call_min` desde el llamado sin recibir respuesta
+- [x] **DINER-03
+**: Comensal recibe push proactivo "TU MESA ESTÁ LISTA" en la pestaña abierta cuando el maître ejecuta la acción "Llamar"
+- [x] **DINER-04
+**: Comensal recibe follow-up automático ("¿Estás en camino? [Pedir más tiempo] [Cancelar]") al transcurrir `followup_after_call_min` desde el llamado sin recibir respuesta
 - [ ] **DINER-05**: Comensal puede pedir más tiempo en lenguaje natural ("dame 5 más", "voy llegando"), y el sistema extiende el `no_show_deadline` por `extension_min`
 - [ ] **DINER-06**: Comensal puede cancelar la reserva en lenguaje natural ("no voy a ir", "cancelar"), y la reserva pasa a `cancelled`
 - [ ] **DINER-07**: Comensal puede consultar su estado, posición y ETA en cualquier momento via chat ("¿cómo voy?")
@@ -26,7 +28,8 @@ Requirements for the hackathon MVP and the same-week pilot. Every requirement ma
 - [ ] **STAFF-04**: Las tarjetas usan codificación visual de color por tamaño de grupo (`colors_by_party_size` de Edge Config)
 - [ ] **STAFF-05**: Maître puede ejecutar "Llamar" en una tarjeta `waiting`, lo que dispara el evento `call` al workflow y el push al comensal
 - [ ] **STAFF-06**: Maître puede ejecutar "Marcar presentado" en una tarjeta `called`, lo que cierra la reserva con estado `seated`
-- [ ] **STAFF-07**: Panel se actualiza en tiempo real (SSE con snapshot-replay-on-connect) cuando entra una nueva reserva o cambia el estado de una existente
+- [x] **STAFF-07
+**: Panel se actualiza en tiempo real (SSE con snapshot-replay-on-connect) cuando entra una nueva reserva o cambia el estado de una existente
 - [ ] **STAFF-08**: Vista `/queue/history` muestra reservas cerradas del día (`seated`, `no_show`, `cancelled`)
 - [ ] **STAFF-09**: Maître puede deshacer un `no_show` en `/queue/history` para reabrir la reserva (caso real: el comensal llegó tarde) — añadido por research §FEATURES (gap #2 para safety del piloto)
 

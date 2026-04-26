@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: planning
-last_updated: "2026-04-26T22:00:00.000Z"
+status: executing
+last_updated: "2026-04-26T21:15:09.533Z"
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 18
-  completed_plans: 12
-  percent: 67
+  completed_plans: 13
+  percent: 72
 ---
 
 # State: Zero to Agent — Restaurant Queue MVP
@@ -22,7 +22,7 @@ progress:
 
 **Core value:** Una reserva entra al chatbot, sobrevive deploys/crashes/timers como workflow durable, y se cierra correctamente (`seated`, `no_show` o `cancelled`) sin perder estado.
 
-**Current focus:** Phase 02 (backend-core) CLOSED. Next: Phase 03 (user-surfaces) planning.
+**Current focus:** Phase --phase — 03
 
 **Hackathon deadline:** ~2026-05-02 (~7 days from 2026-04-25)
 **Pilot start:** Same week as hackathon — real diners, real PII, real correctness requirements
@@ -32,13 +32,13 @@ progress:
 
 ## Current Position
 
-Phase: 03 (user-surfaces) — PLANNED, ready to execute
-Plan: 0 of 6 executed
+Phase: --phase (03) — EXECUTING
+Plan: 1 of --name
 **Milestone:** v1 (hackathon MVP + pilot)
 **Phase:** 3
 **Plan:** Not started (6 plans in 4 waves ready)
-**Status:** Ready to execute
-**Progress:** [████████░░] 67% (12/18 plans across 4 phases — Phase 1+2 done, Phase 3 planned)
+**Status:** Executing Phase --phase
+**Progress:** [███████░░░] 72%
 
 **Next action:** Plan Phase 3 (User Surfaces). Prerequisites: Phase 0 prereqs (Resend domain — B1) must clear before STAFF-01 chatbot UI work; Skew Protection (B2) must clear before the live money-shot rehearsal. Neither blocks Phase 3 PLANNING — both block Phase 3 EXECUTION at specific tasks. The agent can run `/gsd-plan-phase 3` immediately. Phase 3 will consume Phase 2 artifacts UNCHANGED (no new contracts, no breaking changes): 4 MCP tools (02-05), 2 SSE endpoints (02-06), 4 staff endpoints (02-07), service layer (02-03), workflow (02-04 — FROZEN, only step bodies change), seed-demo + smoke tests (02-08).
 
@@ -78,6 +78,7 @@ After plan 02-08, `npm run build` route table includes all 14 routes (3 workflow
 | Phase 02-backend-core P08 (smoke) | 5m | 4 atomic tasks | 4 files (3 created + 1 modified) |
 
 ---
+| Phase 03-user-surfaces P02 | 5m | 3 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -204,3 +205,5 @@ After plan 02-08, `npm run build` route table includes all 14 routes (3 workflow
 **Phase 2 closeout:** 2026-04-26 — 8/8 plans done; 7/7 phase requirements shipped (PLAT-01, PLAT-02, PLAT-03, PLAT-05, PLAT-07, SAFE-01, DEMO-04). Workflow FROZEN per D-11 / Pitfall #4. Phase 3 unblocked.
 
 **Planned Phase:** 3 (User Surfaces) — 6 plans — 2026-04-26 — commits 01134ce (research + CONTEXT D-20 Path C revision), 0f37767 (PATTERNS), a7a9051 (6 PLAN.md files). Plan-checker passed first iteration: 19/19 reqs covered, 15/15 verification points pass. PLAT-08 path resolved via researcher Critical Finding §0 — D-20 revised to Path C (`generateText` from `ai` SDK inside `recompute_eta` step body, NOT `@workflow/ai/agent` which is forbidden inside `"use step"`). Plans 03-01 (D-30 spike, 2h cap) and 03-06 (PLAT-08 path) are `autonomous: false` for user gating at execute time. Wave 2 (03-03 chatbot + 03-04 panel) runs in parallel — disjoint files. STAFF-09 (Reabrir) ships in Phase 3 per CONTEXT D-16 override of cut list #3.
+
+**Last completed plan:** 03-02-hooks-shadcn — 2026-04-26 — commits 0c187c0 (feat: 6 shadcn primitives), 6c1611b (test: RED use-reservation-events), e09e976 (feat: GREEN use-reservation-events), b4fde8b (test: RED use-queue-events), 6e6d83d (feat: GREEN use-queue-events). Requirements shipped: DINER-03, DINER-04, STAFF-07. 22 tests pass. Plans 03-03 (chatbot) and 03-04 (panel) can now run in parallel.
