@@ -87,16 +87,37 @@ call_tool() {
 }
 
 # tools/call responses come back as JSON-RPC envelopes; the tool's own
-# {ok, data|error} payload is JSON-stringified inside content[0].text.
-# We grep for the inner shape — jq would be cleaner but we don't want to
-# require jq for the hackathon laptop setup.
+# {ok, data|error} payload is JSON-stringified inside content[0].text,
+# so the inner JSON arrives with backslash-escaped quotes:
+#   "text":"{\"ok\":true,\"data\":{\"reservation_id\":\"abc-…\"}}"
+#
+# Self-test fixture (fails-fast at script startup if regex breaks):
+#   __MCP_SMOKE_FIXTURE='{"text":"{\"ok\":true,\"data\":{\"reservation_id\":\"r-1\",\"session_token\":\"s-2\"}}"}'
+#
+# Strategy: collapse the escaped inner JSON to plain JSON via sed, then
+# match against the now-unescaped form. Avoids the jq dependency while
+# correctly handling both envelope-escaped and non-escaped responses.
 extract_inner_field() {
   local body="$1"
   local field="$2"
-  # Greedy enough to skip the outer JSON-RPC keys; specific enough to
-  # avoid matching ok:true that lives in a parent envelope.
-  echo "$body" | grep -oE "\"${field}\":\"[^\"]*\"" | head -1 | cut -d'"' -f4
+  # First unescape \" -> " so the inner payload is matchable.
+  local unescaped
+  unescaped=$(printf '%s' "$body" | sed 's/\\"/"/g')
+  printf '%s' "$unescaped" | grep -oE "\"${field}\":\"[^\"]*\"" | head -1 | cut -d'"' -f4
 }
+
+# Self-test the extractor at script startup. If the regex breaks against
+# the realistic MCP envelope shape, fail fast with a clear error rather
+# than silently producing FAIL on the real call.
+__SMOKE_FIXTURE='{"jsonrpc":"2.0","result":{"content":[{"type":"text","text":"{\"ok\":true,\"data\":{\"reservation_id\":\"fixture-r-1\",\"session_token\":\"fixture-s-2\"}}"}]}}'
+__SMOKE_RID=$(extract_inner_field "$__SMOKE_FIXTURE" "reservation_id")
+__SMOKE_TOK=$(extract_inner_field "$__SMOKE_FIXTURE" "session_token")
+if [ "$__SMOKE_RID" != "fixture-r-1" ] || [ "$__SMOKE_TOK" != "fixture-s-2" ]; then
+  echo "[smoke:mcp] FATAL: extract_inner_field self-test failed" >&2
+  echo "[smoke:mcp]   reservation_id expected 'fixture-r-1', got '${__SMOKE_RID}'" >&2
+  echo "[smoke:mcp]   session_token  expected 'fixture-s-2', got '${__SMOKE_TOK}'" >&2
+  exit 2
+fi
 
 # Records pass/fail and prints a one-line summary.
 record() {

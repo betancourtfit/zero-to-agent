@@ -96,11 +96,31 @@ EOF
 fi
 
 # ─── Helpers ──────────────────────────────────────────────────────────
+# tools/call responses come back as JSON-RPC envelopes with the tool's
+# {ok, data|error} payload JSON-stringified inside content[0].text — so
+# the inner JSON arrives with backslash-escaped quotes:
+#   "text":"{\"ok\":true,\"data\":{\"reservation_id\":\"abc-…\"}}"
+# Unescape \" -> " before matching, then extract the field.
 extract_inner_field() {
   local body="$1"
   local field="$2"
-  echo "$body" | grep -oE "\"${field}\":\"[^\"]*\"" | head -1 | cut -d'"' -f4
+  local unescaped
+  unescaped=$(printf '%s' "$body" | sed 's/\\"/"/g')
+  printf '%s' "$unescaped" | grep -oE "\"${field}\":\"[^\"]*\"" | head -1 | cut -d'"' -f4
 }
+
+# Self-test the extractor at script startup. If the regex breaks against
+# the realistic MCP envelope shape, fail fast — the money-shot demo
+# cannot afford a silent capture-failure mid-flight.
+__SMOKE_FIXTURE='{"jsonrpc":"2.0","result":{"content":[{"type":"text","text":"{\"ok\":true,\"data\":{\"reservation_id\":\"fixture-r-1\",\"session_token\":\"fixture-s-2\"}}"}]}}'
+__SMOKE_RID=$(extract_inner_field "$__SMOKE_FIXTURE" "reservation_id")
+__SMOKE_TOK=$(extract_inner_field "$__SMOKE_FIXTURE" "session_token")
+if [ "$__SMOKE_RID" != "fixture-r-1" ] || [ "$__SMOKE_TOK" != "fixture-s-2" ]; then
+  echo "[smoke:money-shot] FATAL: extract_inner_field self-test failed" >&2
+  echo "[smoke:money-shot]   reservation_id expected 'fixture-r-1', got '${__SMOKE_RID}'" >&2
+  echo "[smoke:money-shot]   session_token  expected 'fixture-s-2', got '${__SMOKE_TOK}'" >&2
+  exit 2
+fi
 
 # create_reservation_via_mcp NAME EMAIL PHONE PARTY_SIZE
 # Echoes "<reservation_id>|<session_token>" on stdout, exits non-zero on
