@@ -18,7 +18,8 @@
     "smoke:money-shot": "bash scripts/smoke-money-shot.sh",
     "dev:reset": "npm run db:migrate && npm run seed:demo",
     "test:pg": "tsx scripts/load-test-pg.ts",
-    "spike:usechat": "tsx scripts/spike-usechat-lifecycle.ts"
+    "spike:usechat": "tsx scripts/spike-usechat-lifecycle.ts",
+    "test:fixtures": "tsx --test __tests__/chatbot-conversations.test.ts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.71",
