@@ -23,10 +23,15 @@ const MAX_DEPTH = 4;
 
 const EMAIL_RE = /\b([A-Za-z0-9._%+-])([A-Za-z0-9._%+-]*)@([A-Za-z0-9.-]+\.[A-Za-z]{2,})\b/g;
 
-// Loose AR phone matcher: optional +, optional country/area, 7+ digits with
-// allowed separators. Covers +5491112345678, 5491112345678, 11-2345-6789,
-// (11) 2345-6789, etc. Last 4 digits preserved.
-const PHONE_RE = /(\+?\d[\d\s().-]{6,}\d)/g;
+// Loose AR phone matcher: optional +, then 8+ digits with allowed separators.
+// Covers +5491112345678, 5491112345678, 11-2345-6789, (11) 2345-6789.
+// Negative lookbehind on hex letters / hyphens prevents false positives
+// inside UUIDs (e.g., the middle of "9f3e-1234567890ab" is NOT a phone).
+// Requires the matched substring to contain at least 8 digits — Argentine
+// numbers are 10+ digits, so 8 is a safe minimum that excludes most
+// false-positive numeric tokens (years, prices, IDs).
+const PHONE_RE = /(?<![\da-fA-F-])(\+?\d[\d\s().-]{6,}\d)(?![\da-fA-F-])/g;
+const MIN_PHONE_DIGITS = 8;
 
 const REDACTED = "[REDACTED]";
 
@@ -39,7 +44,7 @@ function maskEmail(input: string): string {
 function maskPhone(input: string): string {
   return input.replace(PHONE_RE, (match) => {
     const digits = match.replace(/\D/g, "");
-    if (digits.length < 7) return match;
+    if (digits.length < MIN_PHONE_DIGITS) return match;
     const last4 = digits.slice(-4);
     const maskedDigits = "*".repeat(digits.length - 4) + last4;
     // Reconstruct preserving a leading + if the original had one,
