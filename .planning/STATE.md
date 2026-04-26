@@ -3,18 +3,18 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-last_updated: "2026-04-26T06:08:09.949Z"
+last_updated: "2026-04-26T06:14:45.000Z"
 progress:
   total_phases: 4
   completed_phases: 1
   total_plans: 12
-  completed_plans: 5
-  percent: 42
+  completed_plans: 6
+  percent: 50
 ---
 
 # State: Zero to Agent — Restaurant Queue MVP
 
-**Last updated:** 2026-04-26 after plan 02-01-spikes-skew completion
+**Last updated:** 2026-04-26 after plan 02-02-log-redactor completion
 
 ---
 
@@ -33,14 +33,14 @@ progress:
 ## Current Position
 
 Phase: 02 (backend-core) — EXECUTING
-Plan: 2 of 8 (next: 02-02-log-redactor)
+Plan: 3 of 8 (next: 02-03-service-layer)
 **Milestone:** v1 (hackathon MVP + pilot)
 **Phase:** 2
-**Plan:** 02-01 complete; 02-02 ready to execute
+**Plan:** 02-01 complete; 02-02 complete; 02-03 ready to execute
 **Status:** Executing Phase 02
-**Progress:** [████░░░░░░] 42%
+**Progress:** [█████░░░░░] 50%
 
-**Next action:** Confirm Skew Protection enabled in the Vercel dashboard (deferred from plan 02-01 Task 1; see 02-01-spikes-skew-SUMMARY.md §"User Setup Required"), then proceed to plan 02-02 (log-redactor). The workflow SDK is wired and the freeze-shape rulebook (`lib/workflows/_README.md`) is published — plan 02-04 (workflow code) is unblocked once Skew Protection is confirmed.
+**Next action:** Proceed to plan 02-03 (service-layer — `lib/services/reservations.ts` + `lib/services/queue.ts`). All later Phase 2 plans (services, workflow, MCP, SSE, staff API) consume `log` from `lib/log.ts` for structured logging; the contract is locked. Skew Protection (B2) still pending and gates plans 02-04 (workflow) + 02-08 (money-shot) — does NOT gate 02-03.
 
 ---
 
@@ -59,7 +59,7 @@ Plan: 2 of 8 (next: 02-02-log-redactor)
 
 ## Performance Metrics
 
-**Plans completed:** 5 (Phase 1: 4 plans + Phase 2: 1 plan)
+**Plans completed:** 6 (Phase 1: 4 plans + Phase 2: 2 plans)
 **Plans repaired:** 0
 **Phases completed:** 1 (Phase 1 — Foundation)
 **Cycles per plan (avg):** 1.0
@@ -68,6 +68,7 @@ Plan: 2 of 8 (next: 02-02-log-redactor)
 | Plan | Duration | Tasks | Files |
 |------|----------|-------|-------|
 | Phase 02-backend-core P01 (spikes-skew) | 7m | 5 (4 atomic + 1 auto-fix) | 7 |
+| Phase 02-backend-core P02 (log-redactor) | 3m | 3 (2 atomic + 1 auto-fix) | 2 |
 
 ---
 
@@ -93,6 +94,10 @@ Plan: 2 of 8 (next: 02-02-log-redactor)
 | Spike A PASS on Node 20.19.4 — `using hook = createHook(...)` cleared in `reservation.ts` | Plan 02-01 Spike A | Manual `try/finally` is fallback only |
 | Spike B treated as NON-BUFFERING (pessimistic); D-10 DB-backed safety net is mandatory primary delivery path | Plan 02-01 Spike B | Safer failure mode for hackathon demo + same-week pilot |
 | Workflow SDK wired into Next.js build via `withWorkflow()` from `workflow/next` | Plan 02-01 Task 2 | Phase 2 prerequisite for plan 02-04 |
+| `lib/log.ts` ships PII redactor + structured logger; `log.info/warn/error` is the only sink for production console output (raw `console.*` outside this file forbidden by convention) | Plan 02-02 Task 1 | Every Phase 2+ module imports `log` from here; SAFE-01 ships |
+| Phone regex hardened with hex-aware boundaries + 8-digit minimum to prevent UUID false-positives | Plan 02-02 Rule 1 auto-fix | Logged reservation rows preserve UUID legibility while still masking real phones |
+| Test convention: `node:test` via `tsx` (no vitest dep) — `npx tsx --test __tests__/<name>.test.ts` | Plan 02-02 Task 2 | All Phase 2+ unit tests follow this pattern |
+| ESLint custom rule for raw `console.*` deferred to Phase 4 polish; flat-config + CI grep step is the Phase 2 fallback | Plan 02-02 deviation #2 | Convention enforced by code review + grep until then |
 
 ### Pending Todos
 
@@ -135,13 +140,13 @@ Plan: 2 of 8 (next: 02-02-log-redactor)
 
 ## Session Continuity
 
-**Previous session ended:** 2026-04-26 after plan 02-01-spikes-skew completion. Workflow SDK wired into Next.js build, both spikes recorded, `lib/workflows/_README.md` freeze-shape rulebook published.
+**Previous session ended:** 2026-04-26 after plan 02-02-log-redactor completion. `lib/log.ts` PII redactor + structured logger shipped (SAFE-01), 7-case `__tests__/log-redact.test.ts` green, build clean.
 
 **Next session should:**
 
-1. Confirm Skew Protection is enabled in the Vercel dashboard (B2 above) — gates plan 02-04 (workflow) and plan 02-08 (money-shot).
-2. Proceed to plan 02-02 (log-redactor — `lib/log.ts` + redactPII helper, SAFE-01).
-3. Plans 02-02 and 02-03 are dashboard-independent and can land in parallel with the user resolving B2.
+1. Proceed to plan 02-03 (service-layer — `lib/services/reservations.ts` + `lib/services/queue.ts`). All service-layer mutations consume `log` from `lib/log.ts` and the D-10 DB-backed safety net pattern.
+2. Skew Protection (B2) still pending; doesn't gate 02-03 but does gate 02-04 (workflow) + 02-08 (money-shot).
+3. After 02-03, plans 02-04 (workflow) + 02-05 (MCP) can run in parallel once B2 is resolved.
 
 **If returning after long gap:**
 
@@ -156,3 +161,5 @@ Plan: 2 of 8 (next: 02-02-log-redactor)
 **Planned Phase:** 1 (Foundation) — 4 plans — 2026-04-26T01:47:31.899Z
 
 **Last completed plan:** 02-01-spikes-skew — 2026-04-26 — commits be77a72, e4170f2, 223a04d, aa6ab70, c39a107
+
+**Last completed plan:** 02-02-log-redactor — 2026-04-26 — commits 81dae58, 87fa419, f8d91f2

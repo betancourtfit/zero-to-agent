@@ -36,7 +36,7 @@ These are NOT a phase the agent runs. They are **blocking human work** that must
 ## Phases
 
 - [ ] **Phase 1: Foundation** — Empty Next.js 16 deployed to Vercel with DB, Auth.js magic-link, Edge Config, KV provisioned, env vars set in all environments
-- [ ] **Phase 2: Backend Core** — MCP server + service layer + WDK durable workflow + KV pub/sub + SSE handlers; money-shot smoke test passes (CRITICAL PATH) — 1/8 plans done (02-01 spikes-skew)
+- [ ] **Phase 2: Backend Core** — MCP server + service layer + WDK durable workflow + KV pub/sub + SSE handlers; money-shot smoke test passes (CRITICAL PATH) — 2/8 plans done (02-01 spikes-skew, 02-02 log-redactor)
 - [ ] **Phase 3: User Surfaces** — Chatbot embed (diner self-serve) + maître panel (queue + history + actions) + DurableAgent ETA, both surfaces real-time via SSE
 - [ ] **Phase 4: Pilot-Hardening + Demo** — Rate limiting, idempotency, monitoring, PII audit, smoke test script, demo video recording, README polish, final prod deploy
 
@@ -98,7 +98,7 @@ Plans:
 
 Plans:
 - [x] 02-01-spikes-skew-PLAN.md — Skew Protection prereq + spike A (`using` keyword) + spike B (createHook buffering decision) + `withWorkflow` wired into next.config.ts + tsconfig workflow plugin + `lib/workflows/_README.md` freeze-shape rulebook (Wave 1, requirements: PLAT-03)
-- [ ] 02-02-log-redactor-PLAN.md
+- [x] 02-02-log-redactor-PLAN.md — `lib/log.ts` PII redactor + structured logger + `__tests__/log-redact.test.ts` (7 cases via `node:test`); ships SAFE-01 (Wave 1, requirements: SAFE-01)
 - [ ] 02-03-service-layer-PLAN.md
 - [ ] 02-04-workflow-PLAN.md
 - [ ] 02-05-mcp-PLAN.md
@@ -184,7 +184,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation | 4/4 | Done | 2026-04-25 |
-| 2. Backend Core | 1/8 | Executing | - |
+| 2. Backend Core | 2/8 | Executing | - |
 | 3. User Surfaces | 0/TBD | Not started | - |
 | 4. Pilot-Hardening + Demo | 0/TBD | Not started | - |
 
