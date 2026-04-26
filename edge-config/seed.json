@@ -1,0 +1,13 @@
+{
+  "no_show_timeout_min": 20,
+  "followup_after_call_min": 1,
+  "extension_min": 5,
+  "max_extensions_per_ticket": 2,
+  "eta_recompute_interval_sec": 60,
+  "colors_by_party_size": {
+    "1-2": "#A8E6CF",
+    "3-4": "#FFD3B6",
+    "5-6": "#FFAAA5",
+    "7+": "#D5AAFF"
+  }
+}
