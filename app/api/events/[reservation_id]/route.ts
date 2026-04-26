@@ -25,7 +25,11 @@ import { sql } from "@/lib/db/neon";
 import { log } from "@/lib/log";
 
 export const runtime = "nodejs";
-export const maxDuration = 800; // Pro + Fluid Compute ceiling
+// Hobby ceiling is 300s; Pro extends this to 800s. Browser EventSource
+// auto-reconnects on close, so the practical user impact is more
+// frequent silent reconnects on Hobby — the snapshot-replay-on-connect
+// pattern means each reconnect starts from Postgres truth.
+export const maxDuration = 300;
 export const dynamic = "force-dynamic";
 
 const redis = Redis.fromEnv();

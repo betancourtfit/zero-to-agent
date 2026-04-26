@@ -26,7 +26,10 @@ import { log } from "@/lib/log";
 import { getActiveQueue } from "@/lib/services/queue";
 
 export const runtime = "nodejs";
-export const maxDuration = 800;
+// Hobby ceiling is 300s; Pro extends to 800s. Snapshot-replay-on-connect
+// means each EventSource reconnect rehydrates from Postgres truth, so
+// the more frequent reconnects on Hobby are functionally equivalent.
+export const maxDuration = 300;
 export const dynamic = "force-dynamic";
 
 const redis = Redis.fromEnv();
