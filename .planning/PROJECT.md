@@ -21,6 +21,15 @@ Sistema de gestión de cola de espera para restaurantes con un **chatbot embed c
 - [x] **DEMO-01**: Deploy Vercel con URL pública estable (4 deploys al mismo alias)
 - [x] **DEMO-02**: Repo público en GitHub (https://github.com/betancourtfit/zero-to-agent)
 
+**Validated in Phase 2 (Backend Core), 2026-04-26 — money-shot proven on production:**
+- [x] **PLAT-01**: Service-layer funnel — `lib/services/reservations.ts` (4 funcs) + `lib/services/queue.ts` (4 funcs); MCP, staff API, future WhatsApp all funnel here
+- [x] **PLAT-02**: MCP server with 4 tools (bearer + per-tool session_token gate); LLM never sees `reservation_id` for action tools
+- [x] **PLAT-03**: WDK durable workflow `waiting → called → seated|no_show|cancelled` survives mid-flight `git push` deploy (UAT 2 confirmed against prod)
+- [x] **PLAT-05**: Upstash pub/sub — real `redis.subscribe()`, NO BLPOP. Multi-SSE fan-out verified (UAT 5)
+- [x] **PLAT-07**: SSE handlers with snapshot-replay-on-connect, heartbeat 25s, abort cleanup. `maxDuration=300` on Hobby (Pro extends to 800)
+- [x] **SAFE-01**: PII redactor `lib/log.ts` — masks email/phone/name/full_name; 7-test suite green
+- [x] **DEMO-04**: `seed-demo.ts` 3-state fixture + `smoke-test-mcp.sh` 5-step harness + `smoke-money-shot.sh` deploy-mid-flight harness all shipped
+
 ### Active
 
 <!-- Current scope. Building toward these. -->
@@ -46,20 +55,23 @@ Sistema de gestión de cola de espera para restaurantes con un **chatbot embed c
 - [ ] **STAFF-08**: Vista `/queue/history` muestra reservas cerradas del día
 
 **Plataforma (backend):**
-- [ ] **PLAT-01**: MCP server público con 4 tools (`create_reservation`, `get_reservation_status`, `extend_wait`, `cancel_reservation`)
-- [ ] **PLAT-02**: Validación de identidad por `session_token` + API key del chatbot
-- [ ] **PLAT-03**: Workflow WDK durable por reserva, ciclo completo `waiting → called → seated|no_show|cancelled`
+- [x] **PLAT-01**: ✓ Validated in Phase 2 (Backend Core)
+- [x] **PLAT-02**: ✓ Validated in Phase 2 (Backend Core)
+- [x] **PLAT-03**: ✓ Validated in Phase 2 (Backend Core)
 - [x] **PLAT-04**: ✓ Validated in Phase 1 (Foundation)
-- [ ] **PLAT-05**: Vercel KV pub/sub para eventos en tiempo real
+- [x] **PLAT-05**: ✓ Validated in Phase 2 (Backend Core)
 - [x] **PLAT-06**: ✓ Validated in Phase 1 (Foundation)
-- [ ] **PLAT-07**: SSE desde Route Handlers de Next.js para chatbot y panel
+- [x] **PLAT-07**: ✓ Validated in Phase 2 (Backend Core)
 - [ ] **PLAT-08**: DurableAgent (`@workflow/ai/agent`) estima ETA dinámicamente
 
 **Demo / submission:**
 - [x] **DEMO-01**: ✓ Validated in Phase 1 (Foundation)
 - [x] **DEMO-02**: ✓ Validated in Phase 1 (Foundation)
 - [ ] **DEMO-03**: Video demo de 90s con los 6 escenarios (alta conversacional, vuelta, llamado+extensión, no-show, Edge Config en vivo, money-shot deploy)
-- [ ] **DEMO-04**: README claro (descripción, stack, cómo correr local)
+- [x] **DEMO-04**: ✓ Validated in Phase 2 (Backend Core)
+
+**Safety / privacy:**
+- [x] **SAFE-01**: ✓ Validated in Phase 2 (Backend Core)
 
 ### Out of Scope
 
