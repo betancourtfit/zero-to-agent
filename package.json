@@ -13,6 +13,9 @@
     "smoke:kv": "tsx scripts/smoke-test-kv.ts",
     "db:migrate": "tsx scripts/db-migrate.ts",
     "seed:maitre": "tsx scripts/seed-maitre.ts",
+    "seed:demo": "tsx scripts/seed-demo.ts",
+    "smoke:mcp": "bash scripts/smoke-test-mcp.sh",
+    "smoke:money-shot": "bash scripts/smoke-money-shot.sh",
     "test:pg": "tsx scripts/load-test-pg.ts"
   },
   "dependencies": {
