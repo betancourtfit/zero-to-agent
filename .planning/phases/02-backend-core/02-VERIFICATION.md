@@ -98,17 +98,17 @@ IN-01 (event_type CHECK constraint), IN-02 (`employee_email` log key not in PII_
 
 ## Gaps
 
-The following items must close to declare Phase 2 fully complete:
+All three mechanical gaps flagged in the initial verification have been closed by the orchestrator post-verification:
 
-1. **CR-01 smoke-test regex bug.** Both `scripts/smoke-test-mcp.sh:93-99` and `scripts/smoke-money-shot.sh:99-103` cannot extract `reservation_id` / `session_token` from the MCP JSON-RPC envelope. Fix with either jq adoption or `sed 's/\\"/"/g'` unescape pre-pass; add a self-test fixture at the top of each script that fails-fast if the extractor returns empty. **This directly blocks ROADMAP success criterion 3.**
+1. ~~**CR-01 smoke-test regex bug.**~~ **CLOSED** — `20490ef fix(02-08): smoke scripts can extract reservation_id from MCP envelope (CR-01)`. Both scripts now `sed 's/\\"/"/g'`-unescape the JSON-RPC envelope before grep-extract; both have self-test fixtures at startup that exit 2 if the extractor breaks. Verified by `bash -n` and fixture self-test.
 
-2. **Lint failure (`prefer-const` in `reservation.ts:487`)** — change `let currentStatus` to `const currentStatus`. One-line fix; required for CI.
+2. ~~**Lint failure (`prefer-const` in `reservation.ts:487`).**~~ **CLOSED** — `86206cb fix(02-04): prefer-const for currentStatus in reservation workflow`. `npm run lint` now exits 0 (remaining 3 warnings are pre-existing from Phase 1 / intentional spike code).
 
-3. **TypeScript test import (`__tests__/log-redact.test.ts:10`)** — drop the `.ts` extension on the import path or add `allowImportingTsExtensions: true` to tsconfig. One-line fix.
-
-These three are mechanical fixes; closing them takes <30 minutes. They are not architectural problems.
+3. ~~**TypeScript test import (`__tests__/log-redact.test.ts:10`).**~~ **CLOSED** — `c622f0c fix(02-02): drop .ts extension from test import (TS5097)`. `npx tsc --noEmit` clean; `npx tsx --test` still 7/7 pass.
 
 The 7 warnings (WR-01..WR-07) from 02-REVIEW.md are real but non-blocking — they describe latent risks (depth-cap leak, race windows, audit asymmetry) that don't prevent the phase goal from being achieved. They should land in Phase 2 polish OR be tracked as Phase 4 hardening items.
+
+**With these three closed, Phase 2 has zero code-level gaps.** Remaining verification is purely live-infrastructure — the 5 items below.
 
 ## Human Verification Required
 
