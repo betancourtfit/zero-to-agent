@@ -7,7 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "check:env-sync": "bash scripts/check-env-sync.sh"
+    "check:env-sync": "bash scripts/check-env-sync.sh",
+    "edge-config:seed": "tsx scripts/edge-config-seed.ts",
+    "edge-config:seed:force": "tsx scripts/edge-config-seed.ts -- --force",
+    "smoke:kv": "tsx scripts/smoke-test-kv.ts"
   },
   "dependencies": {
     "@auth/pg-adapter": "^1.11.2",
