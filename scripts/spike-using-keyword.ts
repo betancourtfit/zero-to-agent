@@ -40,3 +40,8 @@ main().catch((err: unknown) => {
   );
   process.exit(1);
 });
+
+// Force ES module scoping so `main` is not a global symbol — prevents
+// "Duplicate function implementation" errors when scripts/spike-*.ts files
+// share an identical top-level function name in the same TS program.
+export {};
