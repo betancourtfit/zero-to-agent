@@ -7,7 +7,7 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 
-import { redactPII, PII_KEYS } from "../lib/log.ts";
+import { redactPII, PII_KEYS } from "../lib/log";
 
 describe("redactPII", () => {
   it("masks nested email in payload (dot-notation key match is not required — leaf 'email' key matches)", () => {
