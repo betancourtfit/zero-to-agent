@@ -3,18 +3,18 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-last_updated: "2026-04-26T06:14:45.000Z"
+last_updated: "2026-04-26T06:27:46.767Z"
 progress:
   total_phases: 4
   completed_phases: 1
   total_plans: 12
-  completed_plans: 6
-  percent: 50
+  completed_plans: 7
+  percent: 58
 ---
 
 # State: Zero to Agent — Restaurant Queue MVP
 
-**Last updated:** 2026-04-26 after plan 02-02-log-redactor completion
+**Last updated:** 2026-04-26 after plan 02-03-service-layer completion
 
 ---
 
@@ -33,14 +33,14 @@ progress:
 ## Current Position
 
 Phase: 02 (backend-core) — EXECUTING
-Plan: 3 of 8 (next: 02-03-service-layer)
+Plan: 4 of 8 (next: 02-04-workflow)
 **Milestone:** v1 (hackathon MVP + pilot)
 **Phase:** 2
-**Plan:** 02-01 complete; 02-02 complete; 02-03 ready to execute
+**Plan:** 02-01 complete; 02-02 complete; 02-03 complete; 02-04 ready to execute (BLOCKED on B2 Skew Protection)
 **Status:** Executing Phase 02
-**Progress:** [█████░░░░░] 50%
+**Progress:** [██████░░░░] 58%
 
-**Next action:** Proceed to plan 02-03 (service-layer — `lib/services/reservations.ts` + `lib/services/queue.ts`). All later Phase 2 plans (services, workflow, MCP, SSE, staff API) consume `log` from `lib/log.ts` for structured logging; the contract is locked. Skew Protection (B2) still pending and gates plans 02-04 (workflow) + 02-08 (money-shot) — does NOT gate 02-03.
+**Next action:** Proceed to plan 02-04 (workflow — `lib/workflows/reservation.ts`). The service layer (02-03) is wired and waiting for the workflow function reference; specifically `createReservation` has a TODO(02-04) block where the real `start(reservationWorkflow, ...)` call must land (with the D-14 compensating UPDATE on failure). All hook-resume paths (`extendWait`, `cancelReservation`, `markCalled`, `markSeated`, `markNoShowManual`) already call `resumeHook` from `workflow/api` against tokens stored in `reservations.active_hook_token`. Skew Protection (B2) still pending and HARD-blocks plans 02-04 + 02-08.
 
 ---
 
@@ -59,7 +59,7 @@ Plan: 3 of 8 (next: 02-03-service-layer)
 
 ## Performance Metrics
 
-**Plans completed:** 6 (Phase 1: 4 plans + Phase 2: 2 plans)
+**Plans completed:** 7 (Phase 1: 4 plans + Phase 2: 3 plans)
 **Plans repaired:** 0
 **Phases completed:** 1 (Phase 1 — Foundation)
 **Cycles per plan (avg):** 1.0
@@ -69,6 +69,7 @@ Plan: 3 of 8 (next: 02-03-service-layer)
 |------|----------|-------|-------|
 | Phase 02-backend-core P01 (spikes-skew) | 7m | 5 (4 atomic + 1 auto-fix) | 7 |
 | Phase 02-backend-core P02 (log-redactor) | 3m | 3 (2 atomic + 1 auto-fix) | 2 |
+| Phase 02-backend-core P03 (service-layer) | 15m | 4 atomic tasks | 5 files |
 
 ---
 
@@ -98,6 +99,11 @@ Plan: 3 of 8 (next: 02-03-service-layer)
 | Phone regex hardened with hex-aware boundaries + 8-digit minimum to prevent UUID false-positives | Plan 02-02 Rule 1 auto-fix | Logged reservation rows preserve UUID legibility while still masking real phones |
 | Test convention: `node:test` via `tsx` (no vitest dep) — `npx tsx --test __tests__/<name>.test.ts` | Plan 02-02 Task 2 | All Phase 2+ unit tests follow this pattern |
 | ESLint custom rule for raw `console.*` deferred to Phase 4 polish; flat-config + CI grep step is the Phase 2 fallback | Plan 02-02 deviation #2 | Convention enforced by code review + grep until then |
+| Service layer ships in two files: `lib/services/reservations.ts` (diner-facing) + `lib/services/queue.ts` (staff-facing). `ServiceResult<T>` tagged-union return shape is single-sourced from reservations.ts | Plan 02-03 D-18 | MCP tools (02-05) and staff API (02-07) import the same type so the LLM-visible JSON shape stays uniform across all 7 actions |
+| `resumeHook` imported directly from `workflow/api` against tokens stored in `reservations.active_hook_token`. No separate `lib/workflows/hooks.ts` shim — `resumeHook(tokenString, payload)` works without a typed hook handle | Plan 02-03 deviation #3 | Avoids extra file in `lib/workflows/` (Pitfall #4 freeze rule); avoids stub `Promise.resolve()` that was the bug we rebuilt to fix |
+| `markNoShowManual` added to `lib/services/queue.ts` (4 exports total, plan declared 3) — backs the `POST /api/queue/[id]/no_show_manual` endpoint plan 02-07 needs per D-30 | Plan 02-03 deviation #2 (Rule 2) | Without this, 02-07 would have to inline SQL+KV+resumeHook violating the service-layer-funnel commitment |
+| `createReservation` defers `start(reservationWorkflow, ...)` to plan 02-04. The row is inserted with `active_hook_token = 'reservation:<id>:waiting'` so staff API will work as soon as 02-04 lands; a TODO(02-04) block documents the exact code 02-04 must add | Plan 02-03 deviation #1 (Rule 3) | No Phase 2 caller exercises createReservation in 02-03 (MCP create_reservation lands in 02-05 which depends on 02-04) |
+| KV publish helpers in `lib/realtime.ts` use `Redis.fromEnv()` module-scoped (no long-lived subscriptions). Channels: `reservation:<uuid>` per-reservation, `queue:active` fan-out. Payload always includes `id` field mapping to `reservation_events.id` for SSE Last-Event-ID resumability | Plan 02-03 D-20 + D-24 + D-25 | Subscription is ONLY in SSE Route Handlers (02-06); service layer + workflow steps publish through these helpers, never `redis.publish` directly |
 
 ### Pending Todos
 
@@ -112,7 +118,7 @@ Plan: 3 of 8 (next: 02-03-service-layer)
 | # | Blocker | Owner | Resolution Path |
 |---|---------|-------|-----------------|
 | B1 | Resend domain DNS propagation (0–48h) | Human (user) | Buy domain if needed (~$10), add SPF+DKIM+DMARC, wait for "verified" status in Resend dashboard |
-| B2 | Vercel Skew Protection NOT confirmed enabled | Human (user) | Vercel Dashboard → Project → Settings → Skew Protection → Enable. Soft-blocks plan 02-04 (workflow code) and hard-blocks plan 02-08 (money-shot smoke). Deferred from plan 02-01 Task 1 — agent cannot click dashboard toggles. |
+| B2 | Vercel Skew Protection NOT confirmed enabled | Human (user) | Vercel Dashboard → Project → Settings → Skew Protection → Enable. HARD-blocks plan 02-04 (workflow code) and plan 02-08 (money-shot smoke). 02-03 unblocked and complete. Deferred from plan 02-01 Task 1 — agent cannot click dashboard toggles. |
 
 ### Key Files
 
@@ -140,13 +146,16 @@ Plan: 3 of 8 (next: 02-03-service-layer)
 
 ## Session Continuity
 
-**Previous session ended:** 2026-04-26 after plan 02-02-log-redactor completion. `lib/log.ts` PII redactor + structured logger shipped (SAFE-01), 7-case `__tests__/log-redact.test.ts` green, build clean.
+**Previous session ended:** 2026-04-26 after plan 02-03-service-layer completion. `lib/services/reservations.ts` (4 funcs) + `lib/services/queue.ts` (4 funcs) + `lib/realtime.ts` (2 publishers) + `db/migrations/0002_workflow_active_hook.sql` shipped. Build clean, KV smoke green, redactor tests still 7/7. The clean rebuild fixed the prior session's stub `resumeHook` bug — every hook-resume path now imports the real `resumeHook` from `workflow/api`.
 
 **Next session should:**
 
-1. Proceed to plan 02-03 (service-layer — `lib/services/reservations.ts` + `lib/services/queue.ts`). All service-layer mutations consume `log` from `lib/log.ts` and the D-10 DB-backed safety net pattern.
-2. Skew Protection (B2) still pending; doesn't gate 02-03 but does gate 02-04 (workflow) + 02-08 (money-shot).
-3. After 02-03, plans 02-04 (workflow) + 02-05 (MCP) can run in parallel once B2 is resolved.
+1. Resolve B2 (Skew Protection) before any further code in Phase 2 — the user clicks Vercel Dashboard → Settings → Skew Protection → Enable.
+2. Proceed to plan 02-04 (workflow — `lib/workflows/reservation.ts`). The workflow function must:
+   - Read `active_hook_token` from `reservations`, write the next phase token at each transition step.
+   - Replace the TODO(02-04) block in `lib/services/reservations.ts → createReservation` with the real `start(reservationWorkflow, [{reservationId}])` call + try/catch + D-14 compensating UPDATE.
+   - Re-query `reservation_events` on each timeout-branch resume (D-10 safety net consumer side).
+3. After 02-04, plans 02-05 (MCP) and 02-06 (SSE) can run in parallel.
 
 **If returning after long gap:**
 
@@ -163,3 +172,5 @@ Plan: 3 of 8 (next: 02-03-service-layer)
 **Last completed plan:** 02-01-spikes-skew — 2026-04-26 — commits be77a72, e4170f2, 223a04d, aa6ab70, c39a107
 
 **Last completed plan:** 02-02-log-redactor — 2026-04-26 — commits 81dae58, 87fa419, f8d91f2
+
+**Last completed plan:** 02-03-service-layer — 2026-04-26 — commits 09964e2, 4f30b4f, 7122449, 04d01d0, 69bbeae

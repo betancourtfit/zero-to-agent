@@ -36,7 +36,7 @@ These are NOT a phase the agent runs. They are **blocking human work** that must
 ## Phases
 
 - [ ] **Phase 1: Foundation** — Empty Next.js 16 deployed to Vercel with DB, Auth.js magic-link, Edge Config, KV provisioned, env vars set in all environments
-- [ ] **Phase 2: Backend Core** — MCP server + service layer + WDK durable workflow + KV pub/sub + SSE handlers; money-shot smoke test passes (CRITICAL PATH) — 2/8 plans done (02-01 spikes-skew, 02-02 log-redactor)
+- [ ] **Phase 2: Backend Core** — MCP server + service layer + WDK durable workflow + KV pub/sub + SSE handlers; money-shot smoke test passes (CRITICAL PATH) — 3/8 plans done (02-01 spikes-skew, 02-02 log-redactor, 02-03 service-layer)
 - [ ] **Phase 3: User Surfaces** — Chatbot embed (diner self-serve) + maître panel (queue + history + actions) + DurableAgent ETA, both surfaces real-time via SSE
 - [ ] **Phase 4: Pilot-Hardening + Demo** — Rate limiting, idempotency, monitoring, PII audit, smoke test script, demo video recording, README polish, final prod deploy
 
@@ -184,7 +184,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation | 4/4 | Done | 2026-04-25 |
-| 2. Backend Core | 2/8 | Executing | - |
+| 2. Backend Core | 3/8 | Executing | - |
 | 3. User Surfaces | 0/TBD | Not started | - |
 | 4. Pilot-Hardening + Demo | 0/TBD | Not started | - |
 
