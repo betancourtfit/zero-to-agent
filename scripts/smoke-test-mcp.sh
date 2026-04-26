@@ -69,21 +69,29 @@ call_tool() {
   payload=$(printf '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"%s","arguments":%s}}' \
     "${tool_name}" "${args_json}")
 
-  local extra_header=()
-  if [ -n "$session_token" ]; then
-    extra_header=(-H "X-Reservation-Session: ${session_token}")
-  fi
-
   # mcp-handler streamable-HTTP requires Accept: application/json,
   # text/event-stream per the MCP spec; without it the server returns 406.
-  curl -sS \
-    -w "\n%{http_code}" \
-    -X POST "${MCP_URL}" \
-    -H "Content-Type: application/json" \
-    -H "Accept: application/json, text/event-stream" \
-    -H "${BEARER}" \
-    "${extra_header[@]}" \
-    -d "${payload}"
+  # NOTE: bash 3.2 (macOS default) trips `set -u` on `"${arr[@]}"` when the
+  # array is empty, so we branch on the session presence instead of using
+  # an array splat.
+  if [ -n "$session_token" ]; then
+    curl -sS \
+      -w "\n%{http_code}" \
+      -X POST "${MCP_URL}" \
+      -H "Content-Type: application/json" \
+      -H "Accept: application/json, text/event-stream" \
+      -H "${BEARER}" \
+      -H "X-Reservation-Session: ${session_token}" \
+      -d "${payload}"
+  else
+    curl -sS \
+      -w "\n%{http_code}" \
+      -X POST "${MCP_URL}" \
+      -H "Content-Type: application/json" \
+      -H "Accept: application/json, text/event-stream" \
+      -H "${BEARER}" \
+      -d "${payload}"
+  fi
 }
 
 # tools/call responses come back as JSON-RPC envelopes; the tool's own
