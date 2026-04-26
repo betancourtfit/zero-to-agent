@@ -36,7 +36,7 @@ These are NOT a phase the agent runs. They are **blocking human work** that must
 ## Phases
 
 - [ ] **Phase 1: Foundation** — Empty Next.js 16 deployed to Vercel with DB, Auth.js magic-link, Edge Config, KV provisioned, env vars set in all environments
-- [ ] **Phase 2: Backend Core** — MCP server + service layer + WDK durable workflow + KV pub/sub + SSE handlers; money-shot smoke test passes (CRITICAL PATH) — 3/8 plans done (02-01 spikes-skew, 02-02 log-redactor, 02-03 service-layer)
+- [ ] **Phase 2: Backend Core** — MCP server + service layer + WDK durable workflow + KV pub/sub + SSE handlers; money-shot smoke test passes (CRITICAL PATH) — 4/8 plans done (02-01 spikes-skew, 02-02 log-redactor, 02-03 service-layer, 02-04 workflow)
 - [ ] **Phase 3: User Surfaces** — Chatbot embed (diner self-serve) + maître panel (queue + history + actions) + DurableAgent ETA, both surfaces real-time via SSE
 - [ ] **Phase 4: Pilot-Hardening + Demo** — Rate limiting, idempotency, monitoring, PII audit, smoke test script, demo video recording, README polish, final prod deploy
 
@@ -99,8 +99,8 @@ Plans:
 Plans:
 - [x] 02-01-spikes-skew-PLAN.md — Skew Protection prereq + spike A (`using` keyword) + spike B (createHook buffering decision) + `withWorkflow` wired into next.config.ts + tsconfig workflow plugin + `lib/workflows/_README.md` freeze-shape rulebook (Wave 1, requirements: PLAT-03)
 - [x] 02-02-log-redactor-PLAN.md — `lib/log.ts` PII redactor + structured logger + `__tests__/log-redact.test.ts` (7 cases via `node:test`); ships SAFE-01 (Wave 1, requirements: SAFE-01)
-- [ ] 02-03-service-layer-PLAN.md
-- [ ] 02-04-workflow-PLAN.md
+- [x] 02-03-service-layer-PLAN.md — `lib/services/reservations.ts` (4 funcs) + `lib/services/queue.ts` (4 funcs) + `lib/realtime.ts` + 0002 migration; ships service-layer-funnel commitment (Wave 1, requirements: PLAT-01)
+- [x] 02-04-workflow-PLAN.md — `lib/workflows/reservation.ts` durable lifecycle workflow (5 typed hooks + 10 steps + 3-phase router) + `createReservation` start() wired with D-14 compensating action + `_README.md` Implementation Notes; ships PLAT-03 (Wave 1, requirements: PLAT-03)
 - [ ] 02-05-mcp-PLAN.md
 - [ ] 02-06-sse-PLAN.md
 - [ ] 02-07-staff-api-PLAN.md

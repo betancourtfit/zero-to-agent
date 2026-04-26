@@ -34,7 +34,8 @@ Requirements for the hackathon MVP and the same-week pilot. Every requirement ma
 
 - [ ] **PLAT-01**: MCP server público en `app/mcp/[transport]/route.ts` (`mcp-handler@1.1.0` + `withMcpAuth`) expone 4 tools: `create_reservation`, `get_reservation_status`, `extend_wait`, `cancel_reservation`
 - [ ] **PLAT-02**: Cada MCP tool valida identidad por bearer `MCP_API_KEY` del chatbot Y por `session_token` del comensal (header `X-Reservation-Session`); el LLM nunca pasa `reservation_id` para acciones — se resuelve server-side desde el session_token (mitiga Pitfall #5: tool poisoning)
-- [ ] **PLAT-03**: Workflow WDK (`workflow` package) durable por reserva, ciclo completo `waiting → called → seated|no_show|cancelled` con rama `extend`, usando `createHook()` + `Promise.race(hook, sleep("..."))` (NO `waitForEvent` — esa API no existe). Workflow shape congelado al cierre de Phase 2
+- [x] **PLAT-03
+**: Workflow WDK (`workflow` package) durable por reserva, ciclo completo `waiting → called → seated|no_show|cancelled` con rama `extend`, usando `createHook()` + `Promise.race(hook, sleep("..."))` (NO `waitForEvent` — esa API no existe). Workflow shape congelado al cierre de Phase 2
 - [x] **PLAT-04
 **: Persistencia en Neon Postgres (`@neondatabase/serverless` para app + `pg.Pool` para Auth.js adapter) con tablas `reservations`, `reservation_events`, `employees`, y las tablas auto-generadas por Auth.js v5 (`users`, `accounts`, `sessions`, `verification_tokens`)
 - [ ] **PLAT-05**: Upstash Redis (`@upstash/redis`) provee pub/sub real (no LIST+BLPOP) para fan-out de eventos a SSE handlers; canales `reservation:<id>` y `queue:active`. Postgres es source of truth, KV es hint
