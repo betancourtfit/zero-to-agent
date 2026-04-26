@@ -17,9 +17,12 @@
     "smoke:mcp": "bash scripts/smoke-test-mcp.sh",
     "smoke:money-shot": "bash scripts/smoke-money-shot.sh",
     "dev:reset": "npm run db:migrate && npm run seed:demo",
-    "test:pg": "tsx scripts/load-test-pg.ts"
+    "test:pg": "tsx scripts/load-test-pg.ts",
+    "spike:usechat": "tsx scripts/spike-usechat-lifecycle.ts"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^3.0.71",
+    "@ai-sdk/react": "^3.0.170",
     "@auth/pg-adapter": "^1.11.2",
     "@base-ui/react": "^1.4.1",
     "@modelcontextprotocol/sdk": "^1.26.0",
@@ -27,6 +30,7 @@
     "@t3-oss/env-nextjs": "^0.13.11",
     "@upstash/redis": "^1.37.0",
     "@vercel/edge-config": "^1.4.3",
+    "ai": "^6.0.168",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^1.11.0",
