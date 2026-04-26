@@ -138,7 +138,7 @@ After plan 02-08, `npm run build` route table includes all 14 routes (3 workflow
 | # | Blocker | Owner | Resolution Path |
 |---|---------|-------|-----------------|
 | B1 | Resend domain DNS propagation (0–48h) | Human (user) | Buy domain if needed (~$10), add SPF+DKIM+DMARC, wait for "verified" status in Resend dashboard |
-| B2 | Vercel Skew Protection NOT confirmed enabled | Human (user) | Vercel Dashboard → Project → Settings → Skew Protection → Enable. Plan 02-08 AUTHORED the smoke-money-shot.sh harness with a `--dry-run` flag (per orchestrator scope clarification) — script logic + env wiring is validated; the LIVE rehearsal still requires B2. After B2 is toggled and a stable prod URL exists, run `BASE_URL=https://<prod-url> npm run smoke:money-shot` to perform the actual rehearsal. Live rehearsal is not a Phase 3 prereq (the chatbot/panel work consumes Phase 2 artifacts unchanged); it IS a Phase 4 demo prereq. Agent cannot click dashboard toggles. |
+| ~~B2~~ | ~~Vercel Skew Protection~~ | **CLOSED 2026-04-26 — Pro-only, accepted on Hobby** | Project on Hobby plan; Skew Protection requires Pro ($20/mo). Decision: skip — workflow durability comes from Vercel Workflow runtime + frozen workflow shape (Pitfall #4), not Skew Protection. SSE handlers self-heal via snapshot-replay-on-connect. `scripts/smoke-money-shot.sh` updated to verify durability via post-deploy `get_reservation_status` MCP call (commit pending). Documented in CLAUDE.md and `lib/workflows/_README.md`. Optional Pro upgrade for pilot week if SSE 800s ceiling and the closed race window are worth $20 — user's call. |
 
 ### Key Files
 

@@ -223,19 +223,22 @@ try {
 
 The "money shot" is `git push origin main` with active reservations in flight, all of them surviving the deploy and continuing to progress on the new code. This is the ONE demo that validates the project's core value.
 
-### Hard prerequisites (block the rehearsal)
+### Prerequisites
 
-1. **Skew Protection is ENABLED in the Vercel dashboard** (D-17). Project → Settings → Skew Protection → Enable. Without this, in-flight workflows pin to a deployment that gets garbage-collected and break.
-2. `npm run build` succeeds locally with the workflow plugin (verified end of plan 02-01).
-3. Plan 02-08's `scripts/smoke-money-shot.sh` exists and exits 0 against production.
+1. `npm run build` succeeds locally with the workflow plugin (verified end of plan 02-01).
+2. Plan 02-08's `scripts/smoke-money-shot.sh` exists and exits 0 against production.
+3. `BASE_URL` points at a real production URL (Hobby tier deploy is fine).
+
+### Skew Protection: Pro-only, intentionally not required
+
+D-17 originally listed Skew Protection as a hard prerequisite. **Updated 2026-04-26:** the project ships on Vercel Hobby; Skew Protection is Pro-only ($20/mo). Durability comes from Vercel Workflow runtime + frozen workflow shape (Pitfall #4), not from Skew Protection. SSE handlers self-heal via snapshot-replay-on-connect, and the post-deploy `get_reservation_status` MCP call is the explicit durability proof. Optional upgrade for pilot week if SSE 800s ceiling and the closed race window are worth $20.
 
 ### Manual ritual (run before any demo)
 
-1. Verify Skew Protection is enabled (dashboard check).
-2. `npm run seed:demo` — gives you 3 live reservations (1 `waiting`, 1 `called`, 1 `seated`) using the real `createReservation()` service.
-3. Make a trivial commit (e.g., bump a comment in this README) and `git push origin main`.
-4. Watch the Vercel Workflow dashboard + run `SELECT id, status, updated_at FROM reservations ORDER BY updated_at DESC` to confirm in-flight runs continue progressing on the new deployment.
-5. After ~5 minutes, the `waiting` reservation should still be in `waiting`, the `called` reservation should still be in `called`, and any subsequent maître action (call/seated) should advance them as expected.
+1. `npm run seed:demo` — gives you 3 live reservations (1 `waiting`, 1 `called`, 1 `seated`) using the real `createReservation()` service.
+2. Make a trivial commit (e.g., bump a comment in this README) and `git push origin main`.
+3. Watch the Vercel Workflow dashboard + run `SELECT id, status, updated_at FROM reservations ORDER BY updated_at DESC` to confirm in-flight runs continue progressing on the new deployment.
+4. After ~5 minutes, the `waiting` reservation should still be in `waiting`, the `called` reservation should still be in `called`, and any subsequent maître action (call/seated) should advance them as expected.
 
 ### Automated smoke (`scripts/smoke-money-shot.sh`, plan 02-08)
 
@@ -244,8 +247,9 @@ The bash version:
 1. Creates 2 reservations via the MCP `create_reservation` tool, captures both `(reservation_id, session_token)` pairs.
 2. Sleeps 3s for workflows to settle into their `:waiting` race.
 3. Echoes the `git push origin main` command for the operator to run (NOT auto-executed — the operator confirms a no-op commit). Records the timestamp.
-4. Polls each `/api/events/<id>?session_token=<token>` SSE for 60s with `curl -N`. Asserts each receives at least one `event: snapshot` and that subsequent `eta_min` updates arrive AFTER the deploy timestamp.
-5. Exits 0 if both reservations show post-deploy activity, non-zero with the failing `reservation_id` otherwise.
+4. Polls each `/api/events/<id>?session_token=<token>` SSE for 60s with `curl -N`. Asserts each receives at least one `event: snapshot`. On Hobby (no Skew Protection) the connection may drop and reconnect once during the deploy window; the retry loop handles that.
+5. Calls `get_reservation_status` via MCP for each reservation post-deploy — this is the **explicit durability proof**. Both must return `ok:true` with valid state.
+6. Exits 0 if both SSE snapshots and both status calls pass, non-zero with the failing check listed.
 
 ---
 

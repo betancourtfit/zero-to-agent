@@ -54,6 +54,10 @@ These five close the gaps the scope leaves open. Don't deviate without updating 
 4. Resend magic-link in spam → maître locked out → pilot dies. Domain verification is **Phase 0 today** (0–48h DNS).
 5. SSE killed by serverless timeout, push event lost on reconnect → snapshot-replay-on-connect + `Last-Event-ID` is mandatory.
 
+## Skew Protection (B2) — Hobby plan, accepted
+
+We're on Vercel Hobby. Skew Protection is Pro-only ($20/mo) and was originally listed as B2 blocker for the money-shot demo. **Decision (2026-04-26):** skip — workflow durability comes from Vercel Workflow runtime + frozen workflow shape (Pitfall #4), not from Skew Protection. SSE handlers self-heal via snapshot-replay-on-connect after reconnect. The money-shot demo verifies durability via post-deploy `get_reservation_status` MCP call, not via continuous SSE span. On Hobby you may see a 1-2s SSE gap during the deploy window — cosmetic. If real diner load justifies it during pilot week, upgrade to Pro 24-48h before for the SSE 800s ceiling + Skew Protection insurance; otherwise stay on Hobby.
+
 ## GSD Workflow (this project's process)
 
 This project uses GSD (`.planning/`-based workflow). Default behaviors:
