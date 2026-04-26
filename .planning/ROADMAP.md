@@ -57,7 +57,13 @@ These are NOT a phase the agent runs. They are **blocking human work** that must
   4. Vercel Edge Config returns the operational parameters (`no_show_timeout_min`, `followup_after_call_min`, `extension_min`, `max_extensions_per_ticket`, `eta_recompute_interval_sec`, `colors_by_party_size`) when called via `@vercel/edge-config`'s `get()`, and changing a value in the Vercel dashboard takes effect on the next read without a redeploy
   5. The GitHub repo is public, contains a working `.env.example` listing every required key, and `git clone` + `vercel env pull` + `npm install` + `npm run dev` succeeds from a fresh machine
 
-**Plans:** TBD
+**Plans:** 4 plans
+
+Plans:
+- [ ] 01-01-scaffold-vercel-env-PLAN.md — Scaffold Next.js 16 + lib/env.ts validation + .env.example + public GitHub repo + Vercel link + first prod deploy (Wave 1, requirements: DEMO-01, DEMO-02)
+- [ ] 01-02-edge-config-kv-PLAN.md — Seed Edge Config (6 operational params) + Upstash Redis smoke test + typed getConfig wrapper (Wave 1, requirements: PLAT-06)
+- [ ] 01-03-db-migrations-seed-PLAN.md — Postgres schema (7 tables) + migration runner + maître seed + two-clients load test (Wave 2, depends on 01, requirements: PLAT-04)
+- [ ] 01-04-auth-magic-link-PLAN.md — Auth.js v5 split config + Resend magic-link + employees gate (D-09/D-10/D-11/D-12) + /login + /queue stub + E2E verification (Wave 3, depends on 01 + 03, requirements: STAFF-01, DEMO-01, DEMO-02)
 
 **Pitfalls addressed in this phase:**
 - #11 Resend domain verification (gated by Phase 0; verified end-to-end here)
