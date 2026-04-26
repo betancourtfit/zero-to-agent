@@ -40,7 +40,8 @@ Requirements for the hackathon MVP and the same-week pilot. Every requirement ma
 **: Persistencia en Neon Postgres (`@neondatabase/serverless` para app + `pg.Pool` para Auth.js adapter) con tablas `reservations`, `reservation_events`, `employees`, y las tablas auto-generadas por Auth.js v5 (`users`, `accounts`, `sessions`, `verification_tokens`)
 - [ ] **PLAT-05**: Upstash Redis (`@upstash/redis`) provee pub/sub real (no LIST+BLPOP) para fan-out de eventos a SSE handlers; canales `reservation:<id>` y `queue:active`. Postgres es source of truth, KV es hint
 - [ ] **PLAT-06**: Vercel Edge Config almacena parámetros operativos (`no_show_timeout_min`, `followup_after_call_min`, `extension_min`, `max_extensions_per_ticket`, `eta_recompute_interval_sec`, `colors_by_party_size`) — cambios desde dashboard sin redeploy
-- [ ] **PLAT-07**: SSE Route Handlers (`/api/events/[reservation_id]` y `/api/events/queue`) implementan snapshot-replay-on-connect (leer estado actual de Postgres, emitir como evento inicial, luego suscribirse a KV) + heartbeat cada 25s + `maxDuration: 800`
+- [x] **PLAT-07
+**: SSE Route Handlers (`/api/events/[reservation_id]` y `/api/events/queue`) implementan snapshot-replay-on-connect (leer estado actual de Postgres, emitir como evento inicial, luego suscribirse a KV) + heartbeat cada 25s + `maxDuration: 800`
 - [ ] **PLAT-08**: DurableAgent (`@workflow/ai/agent`) estima ETA dinámicamente desde MCP tools `create_reservation` y `get_reservation_status` (con fallback a fórmula determinística si el agent no entrega valor diferenciado)
 
 ### Safety / pilot-readiness (SAFE)

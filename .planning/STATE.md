@@ -3,18 +3,18 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-last_updated: "2026-04-26T06:40:52.700Z"
+last_updated: "2026-04-26T11:42:46.559Z"
 progress:
   total_phases: 4
   completed_phases: 1
   total_plans: 12
-  completed_plans: 8
-  percent: 67
+  completed_plans: 10
+  percent: 83
 ---
 
 # State: Zero to Agent — Restaurant Queue MVP
 
-**Last updated:** 2026-04-26 after plan 02-04-workflow completion
+**Last updated:** 2026-04-26 after plan 02-06-sse completion
 
 ---
 
@@ -33,16 +33,16 @@ progress:
 ## Current Position
 
 Phase: 02 (backend-core) — EXECUTING
-Plan: 6 of 8 (next: 02-06-sse)
+Plan: 7 of 8 (next: 02-07-staff-api)
 **Milestone:** v1 (hackathon MVP + pilot)
 **Phase:** 2
-**Plan:** 02-01..02-05 complete; 02-06 next
+**Plan:** 02-01..02-06 complete; 02-07 next
 **Status:** Executing Phase 02
-**Progress:** [████████░░] 75%
+**Progress:** [████████░░] 83%
 
-**Next action:** Plan 02-06 (SSE Route Handlers — `/api/events/[reservation_id]` and `/api/events/queue`) is next. The MCP route at `app/mcp/[transport]/route.ts` is now an `app/`-reachable entrypoint that imports `lib/services/reservations.ts` → `lib/workflows/reservation.ts`, so the next `npm run build` should report `1 workflow` in the manifest (vs `0` after 02-04). Plan 02-07 depends on 02-06. Plan 02-08 is the final plan and still defers B2 (Skew Protection toggle) until rehearsal time.
+**Next action:** Plan 02-07 (staff API endpoints — `POST /api/queue/[id]/{call,seated,no_show_manual}`) is next. All dependencies are met: service layer (02-03), workflow + hooks (02-04), realtime publishers (02-03 helpers), and now SSE consumers (02-06). The auth pattern was just freshly established in `app/api/events/queue/route.ts` — `auth()` session check + redundant `employees.active = true` lookup. Staff API can copy that block. Plan 02-08 is the final plan and still defers B2 (Skew Protection toggle) until rehearsal time.
 
-Note: the 02-05 SUMMARY.md and ROADMAP/STATE closeout was authored by the orchestrator inline because the gsd-executor agent (`ad1eac2ac66d66106`) hit `FailedToOpenSocket` after committing all three implementation commits. The build is green; no functional gap.
+After plan 02-06, `npm run build` reports `Created manifest with 14 steps, 1 workflow, and 0 classes` — workflow count preserved (the new SSE routes only read DB + subscribe to KV; they do not import `lib/workflows/reservation.ts`).
 
 ---
 
@@ -61,7 +61,7 @@ Note: the 02-05 SUMMARY.md and ROADMAP/STATE closeout was authored by the orches
 
 ## Performance Metrics
 
-**Plans completed:** 8 (Phase 1: 4 plans + Phase 2: 4 plans)
+**Plans completed:** 10 (Phase 1: 4 plans + Phase 2: 6 plans — through 02-06-sse)
 **Plans repaired:** 0
 **Phases completed:** 1 (Phase 1 — Foundation)
 **Cycles per plan (avg):** 1.0
@@ -73,6 +73,7 @@ Note: the 02-05 SUMMARY.md and ROADMAP/STATE closeout was authored by the orches
 | Phase 02-backend-core P02 (log-redactor) | 3m | 3 (2 atomic + 1 auto-fix) | 2 |
 | Phase 02-backend-core P03 (service-layer) | 15m | 4 atomic tasks | 5 files |
 | Phase 02-backend-core P04 (workflow) | 7m | 2 atomic tasks | 3 files |
+| Phase 02-backend-core P06 (sse) | 5m | 2 atomic tasks | 2 files |
 
 ---
 
@@ -111,6 +112,10 @@ Note: the 02-05 SUMMARY.md and ROADMAP/STATE closeout was authored by the orches
 | `createReservation` now invokes `start(reservationWorkflow, [{reservationId}])` with try/catch + D-14 compensating UPDATE (`status='failed_to_start'`). On `start()` failure returns `ServiceResult` with `INTERNAL_ERROR` (Spanish empathic message) instead of re-throwing — preserves the contract every other service function follows | Plan 02-04 deviation #1 (Rule 4) | Phase 02-05 MCP tools wrap `result.ok ? ... : ...`; an exception escape hatch only on this one function would force special-case try/catch in every caller |
 | `computeRemainingSeconds(isoDeadline)` extracted as step #10 (last in FROZEN order — append-safe per D-11) so the router never calls `Date.now()` directly | Plan 02-04 deviation #2 (Rule 2) | D-16 router rule forbids `Date.now()` in workflow body; sleep argument needs to be deterministic at replay so the conversion lives inside a step where it gets persisted to the event log |
 | Workflow build manifest reports "0 workflows" at end of plan 02-04 — `@workflow/next` eager builder only scans files reachable from `app/`/`pages/` entrypoints; service is not yet imported by any route. Will light up when MCP route lands in plan 02-05 | Plan 02-04 verification | TypeScript check passes regardless; this is a discovery deferral, not a compile failure |
+| Upstash `@upstash/redis` v1.x `subscribe()` returns `Subscriber<TMessage>` synchronously (NOT a Promise); `unsubscribe()` is a method on the Subscriber instance; auto-deserialization is on by default so the message handler receives the parsed object (do NOT `JSON.parse(message)` again). Plan pseudocode (and ARCHITECTURE §3.2 example) used incorrect API shape — corrected during implementation | Plan 02-06 deviations #1, #2 (Rule 1) | Cemented in two SSE handlers; future SSE/PubSub work in this repo follows this shape |
+| Pattern 3 (snapshot-replay-on-connect) reference implementation lives in `app/api/events/[reservation_id]/route.ts` and `app/api/events/queue/route.ts`. Order: Postgres snapshot → SSE emit (with id == max event id) → optional gap-recover from `reservation_events` (bounded by `[clientCursor, snapshot.last_event_id]`) → KV subscribe → heartbeat → abort cleanup. Position is computed (no DB column); staff snapshot uses `getActiveQueue()` service to share single source of truth with the panel page | Plan 02-06 task 1 + 2 | Pitfall #6 (missed message during reconnect) and Pitfall #7 (subscriber slot leak) both mitigated; future surfaces (chatbot, panel) consume these endpoints unchanged |
+| Staff SSE auth uses `session.user.email` to look up `employees` (matching `lib/auth/auth.ts` session callback and `app/queue/page.tsx`) — the Auth.js v5 session in this app surfaces `email`, not `id`. Defense in depth: route re-checks `employees.active` even though the session callback already strips inactive employees | Plan 02-06 deviation #5 (Rule 1) | Plan 02-07 staff API endpoints will follow the same pattern; route is self-auditable |
+| Next.js 16 dynamic route params is `Promise<{...}>` and must be awaited inside route handlers | Plan 02-06 deviation #4 (Rule 3) | All future dynamic-segment routes in this repo follow this pattern (already true of `mcp/[transport]/route.ts` indirectly via mcp-handler) |
 
 ### Pending Todos
 
@@ -153,13 +158,13 @@ Note: the 02-05 SUMMARY.md and ROADMAP/STATE closeout was authored by the orches
 
 ## Session Continuity
 
-**Previous session ended:** 2026-04-26 after plan 02-04-workflow completion. `lib/workflows/reservation.ts` shipped (5 typed `defineHook<T>()` + 10 `"use step"` helpers + 3-phase router with DB-backed safety net) and `lib/services/reservations.ts → createReservation` is now wired to `start(reservationWorkflow, [{reservationId}])` with full D-14 compensating-action error handling. `lib/workflows/_README.md` documents the FROZEN shape. TypeScript check passes via `SKIP_ENV_VALIDATION=1 npm run build`. Redactor tests still 7/7. The prior session's `hook.waitFor` API-fabrication bug is resolved — current implementation uses the real `defineHook(...).create({token})` API verified against `node_modules/@workflow/core/dist/define-hook.d.ts`.
+**Previous session ended:** 2026-04-26 after plan 02-06-sse completion. Two SSE Route Handlers shipped: `app/api/events/[reservation_id]/route.ts` (diner, 276 LOC) and `app/api/events/queue/route.ts` (staff, 199 LOC). Both implement Pattern 3 (snapshot-replay-on-connect): Postgres snapshot first, SSE emit with `id == COALESCE(MAX(reservation_events.id), 0)`, optional Last-Event-ID gap recovery, then `redis.subscribe(...)`, with 25s heartbeat and abort-driven cleanup that releases the Upstash subscriber slot. Five Rule 1/Rule 3 deviations from plan pseudocode (wrong Upstash API surface, double-parse, missing `position` column, Next 16 params Promise, `session.user.id` vs `.email`) — all mechanical corrections, design intent preserved. Build manifest still reports `1 workflow`. PLAT-07 complete.
 
 **Next session should:**
 
-1. Run plans 02-05 (MCP server) and 02-06 (SSE Route Handlers) in parallel — both depend on 02-04 (now complete) and have no further blockers. After both ship, plan 02-07 (staff API endpoints) is unblocked.
-2. Plan 02-08 (money-shot smoke) is the final phase plan and DOES still require B2 (Skew Protection) toggled in the Vercel dashboard before the rehearsal. The user must click Vercel Dashboard → Settings → Skew Protection → Enable before running the smoke. This is NOT a code blocker for 02-05/02-06/02-07 — it only matters at the money-shot rehearsal moment.
-3. Once an `app/` route imports `lib/services/reservations.ts` (first will be plan 02-05's MCP route at `app/mcp/[transport]/route.ts`), `npm run build` will start showing the workflow in the manifest (`Created manifest with N steps, 1 workflows`). Currently shows `0 workflows` — expected per `@workflow/next`'s eager builder which only scans files reachable from `app/`/`pages/` entrypoints.
+1. Run plan 02-07 (staff API endpoints — `POST /api/queue/[id]/{call,seated,no_show_manual}`). All dependencies are met: service layer (02-03), workflow + hooks (02-04), realtime publishers (02-03 helpers), and now SSE consumers (02-06). The auth pattern was just freshly established in `app/api/events/queue/route.ts` — `auth()` session check + redundant `employees.active = true` lookup. Staff API can copy that block.
+2. Plan 02-08 (money-shot smoke) is the final phase plan and DOES still require B2 (Skew Protection) toggled in the Vercel dashboard before the rehearsal. The user must click Vercel Dashboard → Settings → Skew Protection → Enable before running the smoke. This is NOT a code blocker for 02-07 — it only matters at the money-shot rehearsal moment.
+3. Phase 03 (user surfaces) consumes both SSE endpoints unchanged: chatbot reads `/api/events/${reservation_id}?session_token=...`; staff panel reads `/api/events/queue`. Pattern is `new EventSource(url)` + `evtSource.addEventListener('snapshot', ...)` + store last seen `event.lastEventId` in `localStorage` for reconnect.
 
 **If returning after long gap:**
 
@@ -180,3 +185,5 @@ Note: the 02-05 SUMMARY.md and ROADMAP/STATE closeout was authored by the orches
 **Last completed plan:** 02-03-service-layer — 2026-04-26 — commits 09964e2, 4f30b4f, 7122449, 04d01d0, 69bbeae
 
 **Last completed plan:** 02-04-workflow — 2026-04-26 — commits 720f430, f145d22
+
+**Last completed plan:** 02-06-sse — 2026-04-26 — commits 855c737, 15ad508
