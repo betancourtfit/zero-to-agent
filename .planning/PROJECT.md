@@ -14,7 +14,12 @@ Sistema de gestión de cola de espera para restaurantes con un **chatbot embed c
 
 <!-- Shipped and confirmed valuable. -->
 
-(None yet — ship to validate)
+**Validated in Phase 1 (Foundation), 2026-04-26 — production at https://zero-to-agent-xi.vercel.app:**
+- [x] **STAFF-01**: Maître se autentica con magic-link via Auth.js (round-trip end-to-end live, D-09/D-10/D-11/D-12 enforced)
+- [x] **PLAT-04**: Persistencia en Neon Postgres — 7 tablas (4 Auth.js + employees, reservations, reservation_events) + `_migrations` runner; maître seeded
+- [x] **PLAT-06**: Vercel Edge Config con 6 parámetros operacionales D-08; cambios desde dashboard propagan sin redeploy (verified 20→5→20)
+- [x] **DEMO-01**: Deploy Vercel con URL pública estable (4 deploys al mismo alias)
+- [x] **DEMO-02**: Repo público en GitHub (https://github.com/betancourtfit/zero-to-agent)
 
 ### Active
 
@@ -31,7 +36,7 @@ Sistema de gestión de cola de espera para restaurantes con un **chatbot embed c
 - [ ] **DINER-08**: Si el comensal no llega y no responde, el sistema lo marca `no_show` automáticamente y le notifica
 
 **Maître (panel auth):**
-- [ ] **STAFF-01**: Maître se autentica con magic-link via Auth.js
+- [x] **STAFF-01**: ✓ Validated in Phase 1 (Foundation)
 - [ ] **STAFF-02**: Maître ve la cola activa del día ordenada cronológicamente (más antiguos primero)
 - [ ] **STAFF-03**: Cada tarjeta de reserva muestra nombre, party size, hora de llegada, estado, ETA, badge de extensión
 - [ ] **STAFF-04**: Codificación visual por tamaño de grupo (colores)
@@ -44,15 +49,15 @@ Sistema de gestión de cola de espera para restaurantes con un **chatbot embed c
 - [ ] **PLAT-01**: MCP server público con 4 tools (`create_reservation`, `get_reservation_status`, `extend_wait`, `cancel_reservation`)
 - [ ] **PLAT-02**: Validación de identidad por `session_token` + API key del chatbot
 - [ ] **PLAT-03**: Workflow WDK durable por reserva, ciclo completo `waiting → called → seated|no_show|cancelled`
-- [ ] **PLAT-04**: Persistencia en Vercel Postgres (reservations, reservation_events, employees, tablas Auth.js)
+- [x] **PLAT-04**: ✓ Validated in Phase 1 (Foundation)
 - [ ] **PLAT-05**: Vercel KV pub/sub para eventos en tiempo real
-- [ ] **PLAT-06**: Vercel Edge Config para parámetros configurables (no_show_timeout_min, followup_after_call_min, extension_min, etc.) — cambios sin redeploy
+- [x] **PLAT-06**: ✓ Validated in Phase 1 (Foundation)
 - [ ] **PLAT-07**: SSE desde Route Handlers de Next.js para chatbot y panel
 - [ ] **PLAT-08**: DurableAgent (`@workflow/ai/agent`) estima ETA dinámicamente
 
 **Demo / submission:**
-- [ ] **DEMO-01**: Deploy en Vercel con URL pública
-- [ ] **DEMO-02**: Repo público en GitHub
+- [x] **DEMO-01**: ✓ Validated in Phase 1 (Foundation)
+- [x] **DEMO-02**: ✓ Validated in Phase 1 (Foundation)
 - [ ] **DEMO-03**: Video demo de 90s con los 6 escenarios (alta conversacional, vuelta, llamado+extensión, no-show, Edge Config en vivo, money-shot deploy)
 - [ ] **DEMO-04**: README claro (descripción, stack, cómo correr local)
 
@@ -140,4 +145,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-25 after initialization*
+*Last updated: 2026-04-26 after Phase 1 (Foundation) completion — 5/32 requirements validated*
