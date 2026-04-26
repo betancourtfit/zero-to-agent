@@ -51,7 +51,8 @@ Requirements for the hackathon MVP and the same-week pilot. Every requirement ma
 ### Safety / pilot-readiness (SAFE)
 
 - [ ] **SAFE-01**: Helper `lib/log.ts` redacta automáticamente PII (email, teléfono, nombre completo) de todos los `console.log` y errores enviados a Vercel Observability — para evitar exposición en logs visibles a cualquiera con acceso al proyecto (mitiga Pitfall #15)
-- [ ] **SAFE-02**: System prompt del chatbot incluye reglas de rechazo (no responder preguntas off-topic), echo-back de datos antes de confirmar reserva, manejo de inputs ambiguos en español ("somos 4 o 5", "tal vez un bebé"), y NUNCA inventar confirmaciones — la confirmación viene del retorno del tool (mitiga FEATURES.md §chatbot UX risks)
+- [x] **SAFE-02
+**: System prompt del chatbot incluye reglas de rechazo (no responder preguntas off-topic), echo-back de datos antes de confirmar reserva, manejo de inputs ambiguos en español ("somos 4 o 5", "tal vez un bebé"), y NUNCA inventar confirmaciones — la confirmación viene del retorno del tool (mitiga FEATURES.md §chatbot UX risks)
 - [ ] **SAFE-03**: Mensaje de no-show automático al comensal usa tono empático y recuperable ("Marcamos tu reserva como no-show porque no llegamos a verte. Si querés volver a anotarte, abrí esta página de nuevo.") en lugar de tono punitivo
 
 ### Demo / submission (DEMO)
