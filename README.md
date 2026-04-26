@@ -2,7 +2,9 @@
 
 Restaurant waitlist MVP for the hackathon pilot. Spanish chatbot for diners, auth-protected panel for the maître, durable WDK workflow per reservation, all on Vercel.
 
-**Production URL:** _set after `vercel link` — pilot bookmarks this_
+**Production URL:** https://zero-to-agent-xi.vercel.app
+
+**Repo:** https://github.com/betancourtfit/zero-to-agent
 
 ## Stack
 
