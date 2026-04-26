@@ -282,10 +282,67 @@ grep -nE 'fetch\([^)]*workflow' app/api/ lib/services/
 
 ---
 
+## Implementation Notes (plan 02-04)
+
+`lib/workflows/reservation.ts` shipped on 2026-04-26 with the FROZEN shape below. After Phase 2 ends, only step **bodies** change — the structure here is locked per Pitfall #4 / D-11.
+
+### Hook definitions (module top)
+
+```ts
+import { defineHook, sleep } from "workflow";
+
+export const callHook         = defineHook<{ type: "call" }>();
+export const extendHook       = defineHook<{ type: "extend"; new_deadline: string; extension_count: number }>();
+export const cancelHook       = defineHook<{ type: "cancel" }>();
+export const seatedHook       = defineHook<{ type: "seated" }>();
+export const noShowManualHook = defineHook<{ type: "no_show_manual" }>();
+```
+
+The workflow uses the typed `.create({token})` form inside the function body. The service layer (`lib/services/reservations.ts` + `lib/services/queue.ts`) currently uses the lower-level `resumeHook(tokenString, payload)` from `workflow/api` against tokens read from `reservations.active_hook_token` — that pattern is preserved from plan 02-03 and stays working. The typed `.resume()` form is forward-compat for Phase 3+.
+
+### Step inventory (FROZEN — count + order)
+
+| Index | Function | Returns (plain JSON) | Notes |
+|---|---|---|---|
+| 1 | `loadReservationSnapshot(id)` | `ReservationSnapshot \| null` | All TIMESTAMPTZ as ISO strings via `::text` projection |
+| 2 | `setActiveHookToken(id, token)` | `{ token, written_at }` | UPDATE before each new hook (so staff API can resume) |
+| 3 | `loadEdgeConfigSnapshot()` | `EdgeConfigSnapshot` | Sample-once-and-store (D-13) |
+| 4 | `fetchMissedEvents(id, lastSeenEventId)` | `MissedEvent[]` | DB-backed safety net (D-10) — every timeout calls this |
+| 5 | `applyCallTransition(id, noShowTimeoutMin)` | `{ no_show_deadline, called_at, event_id }` | Persists `no_show_deadline = now + timeout` ONCE |
+| 6 | `emitFollowupPush(id, message)` | `{ event_id }` | Records workflow_followup event + KV publish |
+| 7 | `reloadDeadlineAfterExtend(id)` | `{ no_show_deadline, extension_count }` | Re-reads row after service-layer extendWait wrote |
+| 8 | `applyNoShowTransition(id, source)` | `{ event_id, ended_at }` | Terminal — workflow timeout path |
+| 9 | `acknowledgeTerminal(id, reason)` | `{ event_id }` | Clears active_hook_token after seated/cancel/no_show_manual |
+| 10 | `computeRemainingSeconds(isoDeadline)` | `{ seconds }` | Where `Date.now()` lives — router-forbidden (D-16) |
+
+### Router phases
+
+The workflow function body is a 3-phase router:
+
+1. **Phase 1: WAITING** — token `reservation:<id>:waiting`. `Promise.race(callHook, cancelHook, sleep(eta_recompute_interval_sec))`. On timeout, replay missed events; ignore any while-waiting `extend`/`seated`.
+2. **Phase 2: CALLED — :called:pre window** — token `reservation:<id>:called:pre`. After `applyCallTransition` writes `no_show_deadline` ONCE (D-13), race all four hook arms (call/extend/cancel/seated/no_show_manual) against `sleep(followup_after_call_min)`. Followup push emits at end of window unless an event lands first.
+3. **Phase 3: CALLED — :called:final window** — token `reservation:<id>:called:final`. Race extend/cancel/seated/no_show_manual against `sleep(remainingSeconds)` where `remainingSeconds` is computed by `computeRemainingSeconds` against the live `no_show_deadline`. On timeout, replay missed events; if still expired, transition to no_show.
+
+Per-event-type sub-tokens (e.g. `:called:pre:extend`, `:called:final:cancel`) let multiple hook arms park on the same phase concurrently. The DB-tracked `active_hook_token` stays at the phase root token (`:called:pre` / `:called:final`) so the service layer's `resumeHook(tokenString, ...)` calls keep working with the existing column.
+
+### Service-layer integration
+
+`lib/services/reservations.ts → createReservation` calls `start(reservationWorkflow, [{ reservationId }])` (plan 02-04). On success, it persists `workflow_run_id` and `active_hook_token = "reservation:<id>:waiting"`. On failure (D-14), it sets `status='failed_to_start'` and returns `INTERNAL_ERROR` to the caller.
+
+Active-queue queries (`lib/services/queue.ts → getActiveQueue`) filter `status NOT IN ('failed_to_start','seated','no_show','cancelled')`, so failed-to-start rows are forensic-only.
+
+### Build / discovery note
+
+The workflow plugin's eager builder (`@workflow/next/dist/builder-eager.js`) only scans files reachable from `app/`, `src/app/`, `pages/`, or `src/pages/` entrypoints (`route.ts`, `page.ts`, `layout.ts`). At end of plan 02-04, no app route imports `lib/services/reservations.ts` yet — so `npm run build` reports `Created manifest with N steps, 0 workflows`. That is **expected and correct** for this phase boundary. Discovery lights up in plan 02-05 (MCP route imports `createReservation`) and again in plan 02-07 (staff API endpoints import queue services).
+
+TypeScript checking covers the workflow file regardless of discovery — the type check passing in `npm run build` is the gate, and it does pass.
+
+---
+
 ## Shape History
 
 *(Append entries here when the workflow shape changes after Phase 2 ships.)*
 
 | Date | Plan | Change | Reason |
 |---|---|---|---|
-| (none yet) | | | |
+| 2026-04-26 | 02-04 | Initial shape: 10 step functions, 3 router phases, 5 typed hooks. FROZEN. | First implementation per plan 02-04. |
