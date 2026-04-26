@@ -33,14 +33,16 @@ progress:
 ## Current Position
 
 Phase: 02 (backend-core) — EXECUTING
-Plan: 5 of 8 (next: 02-05-mcp OR 02-06-sse — can run in parallel)
+Plan: 6 of 8 (next: 02-06-sse)
 **Milestone:** v1 (hackathon MVP + pilot)
 **Phase:** 2
-**Plan:** 02-01 complete; 02-02 complete; 02-03 complete; 02-04 complete; 02-05 + 02-06 ready to execute in parallel (no remaining blockers for those two)
+**Plan:** 02-01..02-05 complete; 02-06 next
 **Status:** Executing Phase 02
-**Progress:** [███████░░░] 67%
+**Progress:** [████████░░] 75%
 
-**Next action:** Plans 02-05 (MCP server) and 02-06 (SSE Route Handlers) can now run in parallel. Both depend on plan 02-04 (workflow) which just shipped. Plan 02-07 (staff API endpoints) depends on 02-05 + 02-06. Plan 02-08 (money-shot smoke) is the final plan and HARD-blocks on B2 (Skew Protection toggle by user) — that blocker stays open until the user clicks Vercel Dashboard → Settings → Skew Protection → Enable, but it does NOT block 02-05 / 02-06 / 02-07 code work; only the money-shot rehearsal in 02-08 needs it. The service layer's `createReservation` now invokes `start(reservationWorkflow, [{reservationId}])` with full D-14 compensating-action error handling. The workflow function is reachable from `lib/services/reservations.ts` via the new import; once plan 02-05's MCP route imports the service, the workflow will appear in `npm run build`'s manifest (currently "0 workflows" because no app/ entrypoint imports the service yet — expected per the @workflow/next eager builder).
+**Next action:** Plan 02-06 (SSE Route Handlers — `/api/events/[reservation_id]` and `/api/events/queue`) is next. The MCP route at `app/mcp/[transport]/route.ts` is now an `app/`-reachable entrypoint that imports `lib/services/reservations.ts` → `lib/workflows/reservation.ts`, so the next `npm run build` should report `1 workflow` in the manifest (vs `0` after 02-04). Plan 02-07 depends on 02-06. Plan 02-08 is the final plan and still defers B2 (Skew Protection toggle) until rehearsal time.
+
+Note: the 02-05 SUMMARY.md and ROADMAP/STATE closeout was authored by the orchestrator inline because the gsd-executor agent (`ad1eac2ac66d66106`) hit `FailedToOpenSocket` after committing all three implementation commits. The build is green; no functional gap.
 
 ---
 

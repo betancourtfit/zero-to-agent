@@ -94,14 +94,14 @@ Plans:
   4. The `seed-demo.ts` script populates 3 reservations in distinct states (`waiting`, `called`, `seated`) and is used as the default dev fixture from this phase forward (NOT just at demo time)
   5. Workflow steps publish state-change events to Upstash Redis pub/sub channels (`reservation:<id>` and `queue:active`) and SSE Route Handlers (`/api/events/[reservation_id]`, `/api/events/queue`) emit a Postgres-snapshot event on connect followed by live KV events — verifiable by opening two `curl -N` SSE connections and triggering a state change
 
-**Plans:** 8 (1 complete)
+**Plans:** 8 (5 complete)
 
 Plans:
 - [x] 02-01-spikes-skew-PLAN.md — Skew Protection prereq + spike A (`using` keyword) + spike B (createHook buffering decision) + `withWorkflow` wired into next.config.ts + tsconfig workflow plugin + `lib/workflows/_README.md` freeze-shape rulebook (Wave 1, requirements: PLAT-03)
 - [x] 02-02-log-redactor-PLAN.md — `lib/log.ts` PII redactor + structured logger + `__tests__/log-redact.test.ts` (7 cases via `node:test`); ships SAFE-01 (Wave 1, requirements: SAFE-01)
 - [x] 02-03-service-layer-PLAN.md — `lib/services/reservations.ts` (4 funcs) + `lib/services/queue.ts` (4 funcs) + `lib/realtime.ts` + 0002 migration; ships service-layer-funnel commitment (Wave 1, requirements: PLAT-01)
 - [x] 02-04-workflow-PLAN.md — `lib/workflows/reservation.ts` durable lifecycle workflow (5 typed hooks + 10 steps + 3-phase router) + `createReservation` start() wired with D-14 compensating action + `_README.md` Implementation Notes; ships PLAT-03 (Wave 1, requirements: PLAT-03)
-- [ ] 02-05-mcp-PLAN.md
+- [x] 02-05-mcp-PLAN.md — MCP server route at `app/mcp/[transport]/route.ts` with 4 tools (`create_reservation`, `get_reservation_status`, `extend_wait`, `cancel_reservation`) + `lib/mcp/auth.ts` (constant-time bearer verify + session resolution); ships PLAT-02 (Wave 1, requirements: PLAT-02)
 - [ ] 02-06-sse-PLAN.md
 - [ ] 02-07-staff-api-PLAN.md
 - [ ] 02-08-smoke-PLAN.md
