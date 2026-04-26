@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-last_updated: "2026-04-26T19:21:07.206Z"
+last_updated: "2026-04-26T22:00:00.000Z"
 progress:
   total_phases: 4
   completed_phases: 2
-  total_plans: 12
+  total_plans: 18
   completed_plans: 12
-  percent: 100
+  percent: 67
 ---
 
 # State: Zero to Agent — Restaurant Queue MVP
@@ -32,13 +32,13 @@ progress:
 
 ## Current Position
 
-Phase: 02 (backend-core) — COMPLETE
-Plan: 8 of 8 (DONE — phase closed)
+Phase: 03 (user-surfaces) — PLANNED, ready to execute
+Plan: 0 of 6 executed
 **Milestone:** v1 (hackathon MVP + pilot)
 **Phase:** 3
-**Plan:** Not started
-**Status:** Ready to plan
-**Progress:** [██████████] 100% (12/12 plans across 2 completed phases of 4)
+**Plan:** Not started (6 plans in 4 waves ready)
+**Status:** Ready to execute
+**Progress:** [████████░░] 67% (12/18 plans across 4 phases — Phase 1+2 done, Phase 3 planned)
 
 **Next action:** Plan Phase 3 (User Surfaces). Prerequisites: Phase 0 prereqs (Resend domain — B1) must clear before STAFF-01 chatbot UI work; Skew Protection (B2) must clear before the live money-shot rehearsal. Neither blocks Phase 3 PLANNING — both block Phase 3 EXECUTION at specific tasks. The agent can run `/gsd-plan-phase 3` immediately. Phase 3 will consume Phase 2 artifacts UNCHANGED (no new contracts, no breaking changes): 4 MCP tools (02-05), 2 SSE endpoints (02-06), 4 staff endpoints (02-07), service layer (02-03), workflow (02-04 — FROZEN, only step bodies change), seed-demo + smoke tests (02-08).
 
@@ -52,7 +52,7 @@ After plan 02-08, `npm run build` route table includes all 14 routes (3 workflow
 |-------|--------|-------|--------------|----------|
 | 1 — Foundation | Complete | 4/4 | 5 | 5/5 |
 | 2 — Backend Core | Complete | 8/8 | 7 | 7/7 |
-| 3 — User Surfaces | Not started | 0/TBD | 19 | 0/19 |
+| 3 — User Surfaces | Planned | 0/6 | 19 | 0/19 |
 | 4 — Pilot-Hardening + Demo | Not started | 0/TBD | 1 | 0/1 |
 
 **Overall:** 32/32 v1 requirements mapped. 12/32 complete (Phase 1: 5; Phase 2: 7).
@@ -202,3 +202,5 @@ After plan 02-08, `npm run build` route table includes all 14 routes (3 workflow
 **Last completed plan:** 02-08-smoke — 2026-04-26 — commits 1fcf33d, a07f084, d369897, c5555df
 
 **Phase 2 closeout:** 2026-04-26 — 8/8 plans done; 7/7 phase requirements shipped (PLAT-01, PLAT-02, PLAT-03, PLAT-05, PLAT-07, SAFE-01, DEMO-04). Workflow FROZEN per D-11 / Pitfall #4. Phase 3 unblocked.
+
+**Planned Phase:** 3 (User Surfaces) — 6 plans — 2026-04-26 — commits 01134ce (research + CONTEXT D-20 Path C revision), 0f37767 (PATTERNS), a7a9051 (6 PLAN.md files). Plan-checker passed first iteration: 19/19 reqs covered, 15/15 verification points pass. PLAT-08 path resolved via researcher Critical Finding §0 — D-20 revised to Path C (`generateText` from `ai` SDK inside `recompute_eta` step body, NOT `@workflow/ai/agent` which is forbidden inside `"use step"`). Plans 03-01 (D-30 spike, 2h cap) and 03-06 (PLAT-08 path) are `autonomous: false` for user gating at execute time. Wave 2 (03-03 chatbot + 03-04 panel) runs in parallel — disjoint files. STAFF-09 (Reabrir) ships in Phase 3 per CONTEXT D-16 override of cut list #3.
