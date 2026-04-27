@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-last_updated: "2026-04-26T21:25:37.940Z"
+last_updated: "2026-04-27T03:09:09.393Z"
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 18
-  completed_plans: 14
-  percent: 78
+  completed_plans: 15
+  percent: 83
 ---
 
 # State: Zero to Agent — Restaurant Queue MVP
@@ -80,6 +80,7 @@ After plan 02-08, `npm run build` route table includes all 14 routes (3 workflow
 ---
 | Phase 03-user-surfaces P02 | 5m | 3 tasks | 10 files |
 | Phase 03-user-surfaces P01 | 30m | 2 tasks | 5 files |
+| Phase 03-user-surfaces P03-chatbot | 30 | 4 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -208,3 +209,5 @@ After plan 02-08, `npm run build` route table includes all 14 routes (3 workflow
 **Planned Phase:** 3 (User Surfaces) — 6 plans — 2026-04-26 — commits 01134ce (research + CONTEXT D-20 Path C revision), 0f37767 (PATTERNS), a7a9051 (6 PLAN.md files). Plan-checker passed first iteration: 19/19 reqs covered, 15/15 verification points pass. PLAT-08 path resolved via researcher Critical Finding §0 — D-20 revised to Path C (`generateText` from `ai` SDK inside `recompute_eta` step body, NOT `@workflow/ai/agent` which is forbidden inside `"use step"`). Plans 03-01 (D-30 spike, 2h cap) and 03-06 (PLAT-08 path) are `autonomous: false` for user gating at execute time. Wave 2 (03-03 chatbot + 03-04 panel) runs in parallel — disjoint files. STAFF-09 (Reabrir) ships in Phase 3 per CONTEXT D-16 override of cut list #3.
 
 **Last completed plan:** 03-02-hooks-shadcn — 2026-04-26 — commits 0c187c0 (feat: 6 shadcn primitives), 6c1611b (test: RED use-reservation-events), e09e976 (feat: GREEN use-reservation-events), b4fde8b (test: RED use-queue-events), 6e6d83d (feat: GREEN use-queue-events). Requirements shipped: DINER-03, DINER-04, STAFF-07. 22 tests pass. Plans 03-03 (chatbot) and 03-04 (panel) can now run in parallel.
+
+**Last completed plan:** 03-03-chatbot — 2026-04-27 — commits ddf0d37 (test: RED chat-tools), 6813465 (feat: /api/chat route), 1bdc1ed (feat: /api/me route), 774fb9a (feat: 5 chat components), c8b5f3b (feat: app/page.tsx + diner-chat-island). Requirements shipped: DINER-01, DINER-02, DINER-03, DINER-04, DINER-05, DINER-06, DINER-07, DINER-08, SAFE-02, SAFE-03 (10 requirements). Awaiting Task 5 checkpoint:human-verify (manual smoke at https://zero-to-agent-xi.vercel.app). Plan 04 (maître panel) can proceed in parallel — disjoint files. Key decisions: transport.headers function-form confirmed PASS (ASSERT-D); synthetic sendMessage({text:'hola'}) on mount chosen over static greeting bubble. Rule 1 auto-fixes: MockLanguageModelV3 API shapes updated for SDK upgrade; expected_tool_calls cast to string[] in fixture test.

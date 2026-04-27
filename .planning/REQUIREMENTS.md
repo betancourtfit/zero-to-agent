@@ -9,16 +9,22 @@ Requirements for the hackathon MVP and the same-week pilot. Every requirement ma
 
 ### Comensal — chatbot embed (DINER)
 
-- [ ] **DINER-01**: Comensal puede registrarse en la cola conversando con el chatbot embebido en `/`, proporcionando nombre, email, teléfono y cantidad de personas
-- [ ] **DINER-02**: Comensal recibe confirmación con `reservation_id`, posición en la cola y ETA estimada al completar el alta
+- [x] **DINER-01
+**: Comensal puede registrarse en la cola conversando con el chatbot embebido en `/`, proporcionando nombre, email, teléfono y cantidad de personas
+- [x] **DINER-02
+**: Comensal recibe confirmación con `reservation_id`, posición en la cola y ETA estimada al completar el alta
 - [x] **DINER-03
 **: Comensal recibe push proactivo "TU MESA ESTÁ LISTA" en la pestaña abierta cuando el maître ejecuta la acción "Llamar"
 - [x] **DINER-04
 **: Comensal recibe follow-up automático ("¿Estás en camino? [Pedir más tiempo] [Cancelar]") al transcurrir `followup_after_call_min` desde el llamado sin recibir respuesta
-- [ ] **DINER-05**: Comensal puede pedir más tiempo en lenguaje natural ("dame 5 más", "voy llegando"), y el sistema extiende el `no_show_deadline` por `extension_min`
-- [ ] **DINER-06**: Comensal puede cancelar la reserva en lenguaje natural ("no voy a ir", "cancelar"), y la reserva pasa a `cancelled`
-- [ ] **DINER-07**: Comensal puede consultar su estado, posición y ETA en cualquier momento via chat ("¿cómo voy?")
-- [ ] **DINER-08**: Si el comensal no llega ni responde dentro del `no_show_deadline` (incluyendo extensiones), el sistema marca la reserva como `no_show` automáticamente y le envía un mensaje empático en el chat
+- [x] **DINER-05
+**: Comensal puede pedir más tiempo en lenguaje natural ("dame 5 más", "voy llegando"), y el sistema extiende el `no_show_deadline` por `extension_min`
+- [x] **DINER-06
+**: Comensal puede cancelar la reserva en lenguaje natural ("no voy a ir", "cancelar"), y la reserva pasa a `cancelled`
+- [x] **DINER-07
+**: Comensal puede consultar su estado, posición y ETA en cualquier momento via chat ("¿cómo voy?")
+- [x] **DINER-08
+**: Si el comensal no llega ni responde dentro del `no_show_deadline` (incluyendo extensiones), el sistema marca la reserva como `no_show` automáticamente y le envía un mensaje empático en el chat
 
 ### Maître — panel auth (STAFF)
 
@@ -53,7 +59,8 @@ Requirements for the hackathon MVP and the same-week pilot. Every requirement ma
 - [ ] **SAFE-01**: Helper `lib/log.ts` redacta automáticamente PII (email, teléfono, nombre completo) de todos los `console.log` y errores enviados a Vercel Observability — para evitar exposición en logs visibles a cualquiera con acceso al proyecto (mitiga Pitfall #15)
 - [x] **SAFE-02
 **: System prompt del chatbot incluye reglas de rechazo (no responder preguntas off-topic), echo-back de datos antes de confirmar reserva, manejo de inputs ambiguos en español ("somos 4 o 5", "tal vez un bebé"), y NUNCA inventar confirmaciones — la confirmación viene del retorno del tool (mitiga FEATURES.md §chatbot UX risks)
-- [ ] **SAFE-03**: Mensaje de no-show automático al comensal usa tono empático y recuperable ("Marcamos tu reserva como no-show porque no llegamos a verte. Si querés volver a anotarte, abrí esta página de nuevo.") en lugar de tono punitivo
+- [x] **SAFE-03
+**: Mensaje de no-show automático al comensal usa tono empático y recuperable ("Marcamos tu reserva como no-show porque no llegamos a verte. Si querés volver a anotarte, abrí esta página de nuevo.") en lugar de tono punitivo
 
 ### Demo / submission (DEMO)
 
