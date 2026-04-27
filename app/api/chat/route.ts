@@ -14,6 +14,7 @@
 //   - experimental_telemetry disables input/output recording to protect PII (D-23).
 
 import { streamText, tool, stepCountIs, convertToModelMessages, type UIMessage } from "ai";
+import { anthropic } from "@ai-sdk/anthropic";
 import { z } from "zod";
 
 import {
@@ -51,7 +52,7 @@ export async function POST(req: Request) {
   const sessionToken = req.headers.get("X-Reservation-Session");
 
   const result = streamText({
-    model: "anthropic/claude-sonnet-4.6", // DOT not dash (CLAUDE.md stack lock)
+    model: anthropic("claude-sonnet-4-6"), // direct @ai-sdk/anthropic — ANTHROPIC_API_KEY env var (AI Gateway needs credit card on Hobby)
     system: SYSTEM_PROMPT,
     messages: await convertToModelMessages(messages), // v6: async — MUST await (spike footgun #1)
     temperature: 0.2, // Reduces variance on Spanish ambiguous inputs (Pitfall #21)
