@@ -14,8 +14,18 @@
 //   - experimental_telemetry disables input/output recording to protect PII (D-23).
 
 import { streamText, tool, stepCountIs, convertToModelMessages, type UIMessage } from "ai";
-import { anthropic } from "@ai-sdk/anthropic";
+import { createOpenAI } from "@ai-sdk/openai";
 import { z } from "zod";
+
+// OpenAI-compatible provider — configure via env vars:
+//   OPENAI_BASE_URL  e.g. https://api.openai.com/v1 or https://api.anthropic.com/v1
+//   OPENAI_API_KEY   your API key for that provider
+//   CHAT_MODEL       model ID (default: gpt-4o-mini)
+const openai = createOpenAI({
+  baseURL: process.env.OPENAI_BASE_URL ?? "https://api.openai.com/v1",
+  apiKey: process.env.OPENAI_API_KEY ?? "",
+});
+const CHAT_MODEL = process.env.CHAT_MODEL ?? "gpt-4o-mini";
 
 import {
   createReservation,
@@ -52,7 +62,7 @@ export async function POST(req: Request) {
   const sessionToken = req.headers.get("X-Reservation-Session");
 
   const result = streamText({
-    model: anthropic("claude-sonnet-4-6"), // direct @ai-sdk/anthropic — ANTHROPIC_API_KEY env var (AI Gateway needs credit card on Hobby)
+    model: openai(CHAT_MODEL),
     system: SYSTEM_PROMPT,
     messages: await convertToModelMessages(messages), // v6: async — MUST await (spike footgun #1)
     temperature: 0.2, // Reduces variance on Spanish ambiguous inputs (Pitfall #21)
