@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-last_updated: "2026-04-27T03:09:09.393Z"
+last_updated: "2026-04-27T23:39:11.242Z"
 progress:
   total_phases: 4
   completed_phases: 2
@@ -22,7 +22,7 @@ progress:
 
 **Core value:** Una reserva entra al chatbot, sobrevive deploys/crashes/timers como workflow durable, y se cierra correctamente (`seated`, `no_show` o `cancelled`) sin perder estado.
 
-**Current focus:** Phase --phase — 03
+**Current focus:** Phase --phase — 3
 
 **Hackathon deadline:** ~2026-05-02 (~7 days from 2026-04-25)
 **Pilot start:** Same week as hackathon — real diners, real PII, real correctness requirements
@@ -32,7 +32,7 @@ progress:
 
 ## Current Position
 
-Phase: --phase (03) — EXECUTING
+Phase: --phase (3) — EXECUTING
 Plan: 1 of --name
 **Milestone:** v1 (hackathon MVP + pilot)
 **Phase:** 3
@@ -210,4 +210,6 @@ After plan 02-08, `npm run build` route table includes all 14 routes (3 workflow
 
 **Last completed plan:** 03-02-hooks-shadcn — 2026-04-26 — commits 0c187c0 (feat: 6 shadcn primitives), 6c1611b (test: RED use-reservation-events), e09e976 (feat: GREEN use-reservation-events), b4fde8b (test: RED use-queue-events), 6e6d83d (feat: GREEN use-queue-events). Requirements shipped: DINER-03, DINER-04, STAFF-07. 22 tests pass. Plans 03-03 (chatbot) and 03-04 (panel) can now run in parallel.
 
-**Last completed plan:** 03-03-chatbot — 2026-04-27 — commits ddf0d37 (test: RED chat-tools), 6813465 (feat: /api/chat route), 1bdc1ed (feat: /api/me route), 774fb9a (feat: 5 chat components), c8b5f3b (feat: app/page.tsx + diner-chat-island). Requirements shipped: DINER-01, DINER-02, DINER-03, DINER-04, DINER-05, DINER-06, DINER-07, DINER-08, SAFE-02, SAFE-03 (10 requirements). Awaiting Task 5 checkpoint:human-verify (manual smoke at https://zero-to-agent-xi.vercel.app). Plan 04 (maître panel) can proceed in parallel — disjoint files. Key decisions: transport.headers function-form confirmed PASS (ASSERT-D); synthetic sendMessage({text:'hola'}) on mount chosen over static greeting bubble. Rule 1 auto-fixes: MockLanguageModelV3 API shapes updated for SDK upgrade; expected_tool_calls cast to string[] in fixture test.
+**Last completed plan:** 03-03-chatbot — 2026-04-27 — commits ddf0d37 (test: RED chat-tools), 6813465 (feat: /api/chat route), 1bdc1ed (feat: /api/me route), 774fb9a (feat: 5 chat components), c8b5f3b (feat: app/page.tsx + diner-chat-island). Requirements shipped: DINER-01, DINER-02, DINER-03, DINER-04, DINER-05, DINER-06, DINER-07, DINER-08, SAFE-02, SAFE-03 (10 requirements). Awaiting Task 5 checkpoint:human-verify (manual smoke at https://zero-to-agent-xi.vercel.app). Key decisions: transport.headers function-form confirmed PASS (ASSERT-D); synthetic sendMessage({text:'hola'}) on mount chosen over static greeting bubble. Rule 1 auto-fixes: MockLanguageModelV3 API shapes updated for SDK upgrade; expected_tool_calls cast to string[] in fixture test.
+
+**Last completed plan:** 03-04-panel — 2026-04-27 — commits 482d724 (feat: Sonner Toaster in layout), 15a82fd (feat: 4 queue components + Rule 2 reopen_count fix), c88b7e1 (feat: app/queue/page.tsx RSC + QueueGrid island). Requirements addressed: STAFF-02..07. Awaiting Task 4 checkpoint:human-verify (manual smoke at https://zero-to-agent-xi.vercel.app/queue). Rule 2 auto-fix: added reopen_count to getActiveQueue SELECT + ActiveQueueItem interface so queue-card reopen badge has data.

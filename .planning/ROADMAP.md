@@ -143,7 +143,7 @@ Plans:
 - [ ] 03-01-spike-usechat-PLAN.md — D-30 AI SDK v6 useChat lifecycle spike + 10-conv SAFE-02 fixture (Wave 1, autonomous: false, 2h cap, requirements: SAFE-02)
 - [ ] 03-02-hooks-shadcn-PLAN.md — shadcn primitives (card, badge, skeleton, alert-dialog, sonner, tabs) + lib/hooks/use-reservation-events.ts + lib/hooks/use-queue-events.ts (Wave 1, depends on 03-01, requirements: DINER-03, DINER-04, STAFF-07)
 - [ ] 03-03-chatbot-PLAN.md — /api/chat + /api/me + 5 chat components + app/page.tsx + 10-conv test (Wave 2, depends on 03-01+03-02, requirements: DINER-01..08, SAFE-02, SAFE-03)
-- [ ] 03-04-panel-PLAN.md — app/queue/page.tsx rebuild + 4 queue components + Sonner Toaster wiring (Wave 2, parallel with 03-03, depends on 03-02, requirements: STAFF-02..07)
+- [x] 03-04-panel-PLAN.md — app/queue/page.tsx rebuild + 4 queue components + Sonner Toaster wiring (Wave 2, parallel with 03-03, depends on 03-02, requirements: STAFF-02..07) — awaiting Task 4 human-verify checkpoint
 - [ ] 03-05-history-reopen-PLAN.md — 0003 migration + reopenNoShow service + /api/queue/[id]/reopen + /queue/history page + history-table + reopen-dialog (Wave 3, depends on 03-02+03-04, requirements: STAFF-08, STAFF-09)
 - [ ] 03-06-recompute-eta-PLAN.md — recompute_eta step body swap to generateText (Path C from RESEARCH §0); FROZEN workflow shape preserved (Wave 4, depends on 03-04+03-05, autonomous: false, requirements: PLAT-08)
 
