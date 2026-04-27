@@ -24,6 +24,8 @@ import { z } from "zod";
 const openai = createOpenAI({
   baseURL: process.env.OPENAI_BASE_URL ?? "https://api.openai.com/v1",
   apiKey: process.env.OPENAI_API_KEY ?? "",
+  // Force /v1/chat/completions — vLLM/LiteLLM proxies don't support the newer /v1/responses format
+  compatibility: "compatible",
 });
 const CHAT_MODEL = process.env.CHAT_MODEL ?? "gpt-4o-mini";
 
@@ -62,7 +64,7 @@ export async function POST(req: Request) {
   const sessionToken = req.headers.get("X-Reservation-Session");
 
   const result = streamText({
-    model: openai(CHAT_MODEL),
+    model: openai.chat(CHAT_MODEL), // .chat() forces /v1/chat/completions — openai() alone uses /v1/responses in SDK v3
     system: SYSTEM_PROMPT,
     messages: await convertToModelMessages(messages), // v6: async — MUST await (spike footgun #1)
     temperature: 0.2, // Reduces variance on Spanish ambiguous inputs (Pitfall #21)
