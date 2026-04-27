@@ -45,7 +45,7 @@ describe("chatbot conversation fixtures (D-30 SAFE-02)", () => {
     const happy = fixtures.conversations.find((c) => c.id === "valid-registration");
     assert.ok(happy, "valid-registration case is missing");
     assert.ok(
-      happy.expected_tool_calls.includes("register_diner"),
+      (happy.expected_tool_calls as string[]).includes("register_diner"),
       "valid-registration must expect register_diner tool call",
     );
   });

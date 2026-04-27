@@ -1,18 +1,17 @@
-import Link from "next/link";
+// Server Component shell for the diner chatbot page (D-01, D-09).
+// Reads Edge Config server-side (single fetch + props handoff) and passes
+// the palette to the client island — Edge Config reads in client-side code
+// are no-ops on Vercel (the value is only set at server request time).
+import { DinerChat } from "@/components/chat/diner-chat-island";
+import { getTypedConfig } from "@/lib/edge-config";
 
-export default function HomePage() {
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-6 p-8">
-      <h1 className="text-3xl font-bold tracking-tight">Cola de Espera</h1>
-      <p className="text-muted-foreground">
-        Gestión de reservas para tu restaurante, sin complicaciones.
-      </p>
-      <Link
-        href="/login"
-        className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-      >
-        Ingresar al panel
-      </Link>
-    </main>
+export const dynamic = "force-dynamic";
+
+export default async function Home() {
+  const colorsByPartySize = await getTypedConfig<Record<string, string>>(
+    "colors_by_party_size",
+    { "1-2": "#A8E6CF", "3-4": "#FFD3B6", "5-6": "#FFAAA5", "7+": "#D5AAFF" },
   );
+
+  return <DinerChat colorsByPartySize={colorsByPartySize} />;
 }

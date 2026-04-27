@@ -76,8 +76,11 @@ async function runAssertAB(): Promise<{ assertA: boolean; assertB: boolean }> {
     },
     {
       type: "finish",
-      finishReason: "tool-calls",
-      usage: { inputTokens: 20, outputTokens: 30 },
+      finishReason: { unified: "tool-calls", raw: "tool-calls" },
+      usage: {
+        inputTokens: { total: 20, noCache: 20, cacheRead: undefined, cacheWrite: undefined },
+        outputTokens: { total: 30, text: 30, reasoning: undefined },
+      },
     },
   ];
 
@@ -87,7 +90,7 @@ async function runAssertAB(): Promise<{ assertA: boolean; assertB: boolean }> {
         stream: simulateReadableStream({ chunks: toolCallChunks, chunkDelayInMs: 0 }),
         rawValue: {},
         request: { body: "" },
-        response: { id: "test-1", timestamp: new Date(), modelId: "mock" },
+        response: { headers: {} },
         warnings: [],
       }),
   });
@@ -202,8 +205,11 @@ async function runAssertC(): Promise<boolean> {
     },
     {
       type: "finish",
-      finishReason: "tool-calls",
-      usage: { inputTokens: 20, outputTokens: 30 },
+      finishReason: { unified: "tool-calls", raw: "tool-calls" },
+      usage: {
+        inputTokens: { total: 20, noCache: 20, cacheRead: undefined, cacheWrite: undefined },
+        outputTokens: { total: 30, text: 30, reasoning: undefined },
+      },
     },
   ];
 
@@ -214,7 +220,7 @@ async function runAssertC(): Promise<boolean> {
         stream: simulateReadableStream({ chunks: loopChunks(), chunkDelayInMs: 0 }),
         rawValue: {},
         request: { body: "" },
-        response: { id: `test-loop-${callCount}`, timestamp: new Date(), modelId: "mock" },
+        response: { headers: {} },
         warnings: [],
       });
     },
