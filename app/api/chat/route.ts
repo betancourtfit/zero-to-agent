@@ -24,8 +24,6 @@ import { z } from "zod";
 const openai = createOpenAI({
   baseURL: process.env.OPENAI_BASE_URL ?? "https://api.openai.com/v1",
   apiKey: process.env.OPENAI_API_KEY ?? "",
-  // Force /v1/chat/completions — vLLM/LiteLLM proxies don't support the newer /v1/responses format
-  compatibility: "compatible",
 });
 const CHAT_MODEL = process.env.CHAT_MODEL ?? "gpt-4o-mini";
 
