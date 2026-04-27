@@ -28,6 +28,7 @@ export interface ActiveQueueItem {
   position: number;
   eta_min: number | null;
   extension_count: number;
+  reopen_count: number;
   no_show_deadline: string | null;
   called_at: string | null;
   created_at: string;
@@ -40,6 +41,7 @@ interface ActiveQueueRow {
   party_size: number;
   eta_min: number | null;
   extension_count: number;
+  reopen_count: number;
   no_show_deadline: string | null;
   called_at: string | null;
   created_at: string;
@@ -52,7 +54,7 @@ interface ActiveQueueRow {
 export async function getActiveQueue(): Promise<ActiveQueueItem[]> {
   const rows = (await sql`
     SELECT
-      id, status, name, party_size, eta_min, extension_count,
+      id, status, name, party_size, eta_min, extension_count, reopen_count,
       no_show_deadline::text AS no_show_deadline,
       called_at::text AS called_at,
       created_at::text AS created_at
@@ -71,6 +73,7 @@ export async function getActiveQueue(): Promise<ActiveQueueItem[]> {
     position: idx + 1,
     eta_min: row.eta_min,
     extension_count: row.extension_count,
+    reopen_count: row.reopen_count,
     no_show_deadline: row.no_show_deadline,
     called_at: row.called_at,
     created_at: row.created_at,
