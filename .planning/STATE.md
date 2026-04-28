@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-last_updated: "2026-04-27T23:39:11.242Z"
+last_updated: "2026-04-28T02:39:07.503Z"
 progress:
   total_phases: 4
   completed_phases: 2
   total_plans: 18
-  completed_plans: 15
-  percent: 83
+  completed_plans: 17
+  percent: 94
 ---
 
 # State: Zero to Agent — Restaurant Queue MVP
@@ -52,10 +52,10 @@ After plan 02-08, `npm run build` route table includes all 14 routes (3 workflow
 |-------|--------|-------|--------------|----------|
 | 1 — Foundation | Complete | 4/4 | 5 | 5/5 |
 | 2 — Backend Core | Complete | 8/8 | 7 | 7/7 |
-| 3 — User Surfaces | Planned | 0/6 | 19 | 0/19 |
+| 3 — User Surfaces | Executing | 5/6 | 19 | 17/19 |
 | 4 — Pilot-Hardening + Demo | Not started | 0/TBD | 1 | 0/1 |
 
-**Overall:** 32/32 v1 requirements mapped. 12/32 complete (Phase 1: 5; Phase 2: 7).
+**Overall:** 32/32 v1 requirements mapped. 29/32 complete (Phase 1: 5; Phase 2: 7; Phase 3: 17 — pending PLAT-08).
 
 ---
 
@@ -80,7 +80,10 @@ After plan 02-08, `npm run build` route table includes all 14 routes (3 workflow
 ---
 | Phase 03-user-surfaces P02 | 5m | 3 tasks | 10 files |
 | Phase 03-user-surfaces P01 | 30m | 2 tasks | 5 files |
-| Phase 03-user-surfaces P03-chatbot | 30 | 4 tasks | 12 files |
+| Phase 03-user-surfaces P03-chatbot | 30m | 4 tasks | 12 files |
+| Phase 03-user-surfaces P04-panel | 4m | 3 tasks | 7 files |
+| Phase 03-user-surfaces P05-history-reopen | 25m | 6 tasks | 8 files |
+| Phase 03-user-surfaces P05 | 25m | 6 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -213,3 +216,5 @@ After plan 02-08, `npm run build` route table includes all 14 routes (3 workflow
 **Last completed plan:** 03-03-chatbot — 2026-04-27 — commits ddf0d37 (test: RED chat-tools), 6813465 (feat: /api/chat route), 1bdc1ed (feat: /api/me route), 774fb9a (feat: 5 chat components), c8b5f3b (feat: app/page.tsx + diner-chat-island). Requirements shipped: DINER-01, DINER-02, DINER-03, DINER-04, DINER-05, DINER-06, DINER-07, DINER-08, SAFE-02, SAFE-03 (10 requirements). Awaiting Task 5 checkpoint:human-verify (manual smoke at https://zero-to-agent-xi.vercel.app). Key decisions: transport.headers function-form confirmed PASS (ASSERT-D); synthetic sendMessage({text:'hola'}) on mount chosen over static greeting bubble. Rule 1 auto-fixes: MockLanguageModelV3 API shapes updated for SDK upgrade; expected_tool_calls cast to string[] in fixture test.
 
 **Last completed plan:** 03-04-panel — 2026-04-27 — commits 482d724 (feat: Sonner Toaster in layout), 15a82fd (feat: 4 queue components + Rule 2 reopen_count fix), c88b7e1 (feat: app/queue/page.tsx RSC + QueueGrid island). Requirements addressed: STAFF-02..07. Awaiting Task 4 checkpoint:human-verify (manual smoke at https://zero-to-agent-xi.vercel.app/queue). Rule 2 auto-fix: added reopen_count to getActiveQueue SELECT + ActiveQueueItem interface so queue-card reopen badge has data.
+
+**Last completed plan:** 03-05-history-reopen — 2026-04-28 — commits 3984bb6 (feat: reopenNoShow 5th export), 0e320fb (feat: POST /api/queue/[id]/reopen), 9f66703 (feat: GET /api/queue/history), 9d62140 (feat: reopen-dialog + history-table), 89635d4 (feat: /queue/history RSC page). Requirements shipped: STAFF-08, STAFF-09. Tasks 1-6 complete. Task 7 checkpoint:human-verify pending (manual smoke at https://zero-to-agent-xi.vercel.app/queue/history). Rule 1 auto-fixes: AlertDialog asChild → inline Tailwind (base-ui incompatibility); AlertDialogAction → controlled open state (base-ui no auto-close). Rule 2: NOT_IN_NO_SHOW_STATE added to ServiceErrorCode. Migration 0003 pre-existing from plan 03-04.

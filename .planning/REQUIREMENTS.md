@@ -36,8 +36,10 @@ Requirements for the hackathon MVP and the same-week pilot. Every requirement ma
 - [ ] **STAFF-06**: Maître puede ejecutar "Marcar presentado" en una tarjeta `called`, lo que cierra la reserva con estado `seated`
 - [x] **STAFF-07
 **: Panel se actualiza en tiempo real (SSE con snapshot-replay-on-connect) cuando entra una nueva reserva o cambia el estado de una existente
-- [ ] **STAFF-08**: Vista `/queue/history` muestra reservas cerradas del día (`seated`, `no_show`, `cancelled`)
-- [ ] **STAFF-09**: Maître puede deshacer un `no_show` en `/queue/history` para reabrir la reserva (caso real: el comensal llegó tarde) — añadido por research §FEATURES (gap #2 para safety del piloto)
+- [x] **STAFF-08
+**: Vista `/queue/history` muestra reservas cerradas del día (`seated`, `no_show`, `cancelled`)
+- [x] **STAFF-09
+**: Maître puede deshacer un `no_show` en `/queue/history` para reabrir la reserva (caso real: el comensal llegó tarde) — añadido por research §FEATURES (gap #2 para safety del piloto)
 
 ### Plataforma — backend (PLAT)
 
