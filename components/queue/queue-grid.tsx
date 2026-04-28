@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useQueueEvents } from "@/lib/hooks/use-queue-events";
 import type { ActiveQueueItem } from "@/lib/services/queue";
+import type { ActiveQueueRow } from "@/lib/hooks/use-queue-events";
 import { QueueCard } from "./queue-card";
 import { NavBar } from "./nav-bar";
 
@@ -23,12 +24,57 @@ export function QueueGrid({
   initial: ActiveQueueItem[];
   colorsByPartySize: Record<string, string>;
 }) {
-  const { reservations: liveReservations, connection } = useQueueEvents();
+  const { reservations: liveReservations, latestEvent, connection } = useQueueEvents();
 
-  // Use initial server-rendered snapshot until the hook's first SSE snapshot arrives.
-  // liveReservations starts as [] — once SSE delivers the snapshot it becomes non-empty.
-  const reservations =
-    liveReservations.length > 0 ? liveReservations : initial;
+  // Local mutable copy — starts from RSC snapshot, syncs from SSE snapshots,
+  // then applies individual event deltas so cards update without a full reload.
+  const [reservations, setReservations] = useState<ActiveQueueRow[]>(initial as ActiveQueueRow[]);
+
+  // Sync when SSE delivers a fresh full snapshot (connection / reconnect).
+  useEffect(() => {
+    if (liveReservations.length > 0) {
+      setReservations(liveReservations);
+    }
+  }, [liveReservations]);
+
+  // Apply individual event deltas so the UI reacts without waiting for a new snapshot.
+  useEffect(() => {
+    if (!latestEvent) return;
+    const { type, data } = latestEvent;
+    const id = (data as Record<string, unknown>)?.reservation_id as string | undefined;
+
+    if (!id) return;
+
+    if (type === "reservation.called") {
+      setReservations((prev) =>
+        prev.map((r) =>
+          r.reservation_id === id
+            ? { ...r, status: "called" as const, called_at: (data as Record<string, unknown>).occurred_at as string ?? new Date().toISOString() }
+            : r,
+        ),
+      );
+    } else if (
+      type === "reservation.seated" ||
+      type === "reservation.cancelled" ||
+      type === "reservation.no_show"
+    ) {
+      setReservations((prev) => prev.filter((r) => r.reservation_id !== id));
+    } else if (
+      type === "reservation.created" ||
+      type === "queue.changed" ||
+      type === "reservation.reopened"
+    ) {
+      // Can't reconstruct full row from event payload — re-fetch the queue.
+      fetch("/api/queue", { credentials: "include" })
+        .then((r) => r.json())
+        .then((body: { ok: boolean; data?: ActiveQueueRow[] }) => {
+          if (body.ok && Array.isArray(body.data)) setReservations(body.data);
+        })
+        .catch(() => {
+          // Ignore — SSE snapshot on next reconnect will self-heal.
+        });
+    }
+  }, [latestEvent]);
 
   const [loadingMap, setLoadingMap] = useState<
     Record<string, "call" | "seated" | null>
