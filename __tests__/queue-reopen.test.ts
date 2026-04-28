@@ -5,25 +5,10 @@
 // Mocks: loadReservation (private helper), start (workflow/api),
 //        sql (lib/db/neon), publishReservationEvent + publishQueueEvent (lib/realtime).
 
-import { describe, it, before, mock, afterEach } from "node:test";
+import { describe, it, mock, afterEach } from "node:test";
 import assert from "node:assert/strict";
 
 // ---- Mock scaffolding ------------------------------------------------
-// We intercept the modules before importing the SUT so that the mocks are
-// in place when reopenNoShow is imported (ESM mock hoisting).
-
-type MockFn = ReturnType<typeof mock.fn>;
-
-const mockSqlTag = mock.fn(async () => [{ id: 42 }]);
-// sql is used as a template tag: sql`...`. We need it to behave as a tagged
-// template function. The mock wraps this.
-function sqlMock(...args: unknown[]) {
-  return (mockSqlTag as unknown as (...a: unknown[]) => Promise<unknown[]>)(...args);
-}
-
-const mockStart = mock.fn(async () => ({ runId: "new-run-id-abc" }));
-const mockPublishReservation = mock.fn(async () => undefined);
-const mockPublishQueue = mock.fn(async () => undefined);
 const mockLogWarn = mock.fn(() => undefined);
 const mockLogInfo = mock.fn(() => undefined);
 const mockLogError = mock.fn(() => undefined);
@@ -139,9 +124,9 @@ function makeDeps(overrides: Partial<Parameters<typeof reopenNoShowUnderTest>[1]
     publishReservationEvent: async () => undefined,
     publishQueueEvent: async () => undefined,
     log: {
-      warn: mockLogWarn as unknown as MockFn,
-      info: mockLogInfo as unknown as MockFn,
-      error: mockLogError as unknown as MockFn,
+      warn: (_event: string, _ctx?: unknown) => undefined,
+      info: (_event: string, _ctx?: unknown) => undefined,
+      error: (_event: string, _err?: unknown, _ctx?: unknown) => undefined,
     },
     ...overrides,
   };
