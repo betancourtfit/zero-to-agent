@@ -67,7 +67,8 @@ export async function GET() {
            ended_at::text    AS ended_at
     FROM reservations
     WHERE status IN ('seated', 'no_show', 'cancelled')
-      AND DATE(created_at AT TIME ZONE 'America/Argentina/Buenos_Aires') = CURRENT_DATE
+      AND DATE(created_at AT TIME ZONE 'America/Argentina/Buenos_Aires')
+        = (CURRENT_TIMESTAMP AT TIME ZONE 'America/Argentina/Buenos_Aires')::date
     ORDER BY ended_at DESC NULLS LAST
   `) as HistoryRow[];
 
