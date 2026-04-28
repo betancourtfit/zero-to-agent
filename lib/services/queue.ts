@@ -1,7 +1,7 @@
 // Staff-facing service layer (D-18). The Phase 3 maître panel reads
 // getActiveQueue() for its queue cards; the Phase 02-07 staff action API
 // endpoints (POST /api/queue/[id]/{call,seated,no_show_manual}) call
-// markCalled / markSeated / markNoShowManual.
+// markCalled / markSeated / markNoShowManual. Plan 03-05 adds reopenNoShow (5th).
 //
 // Discipline mirrors lib/services/reservations.ts:
 //   - Postgres via lib/db/neon.ts HTTP client (D-19)
@@ -10,6 +10,9 @@
 //   - DB-backed safety net (D-10): INSERT reservation_events BEFORE resumeHook
 //   - Hook resume in-process (D-37): import resumeHook from "workflow/api"
 
+import { start } from "workflow/api";
+
+import { reservationWorkflow } from "@/lib/workflows/reservation";
 import { sql } from "@/lib/db/neon";
 import { log } from "@/lib/log";
 import {
@@ -370,5 +373,108 @@ export async function markNoShowManual(
   return {
     ok: true,
     data: { reservation_id: reservationId, new_status: "no_show" },
+  };
+}
+
+// Reopens a no_show reservation by starting a NEW workflow run (STAFF-09 / D-16).
+// The prior workflow already terminated when the reservation entered no_show state,
+// so there is NO safeResumeHook call here — start() is the entire control-flow handover.
+// D-14 compensation: if start() throws, return INTERNAL_ERROR without mutating the row.
+export async function reopenNoShow(
+  reservationId: string,
+): Promise<ServiceResult<{ reservation_id: string; new_status: "waiting" }>> {
+  const row = await loadReservation(reservationId);
+  if (!row) {
+    log.warn("queue.reopen.not_found", { reservation_id: reservationId });
+    return {
+      ok: false,
+      error: {
+        code: "RESERVATION_NOT_FOUND",
+        message: "No encontramos esa reserva.",
+      },
+    };
+  }
+
+  if (row.status !== "no_show") {
+    log.warn("queue.reopen.bad_state", {
+      reservation_id: reservationId,
+      status: row.status,
+    });
+    return {
+      ok: false,
+      error: {
+        code: "NOT_IN_NO_SHOW_STATE",
+        message: "Solo se pueden reabrir reservas marcadas como no-show.",
+      },
+    };
+  }
+
+  // Start a NEW workflow run — the prior run is already terminated.
+  let runId: string;
+  try {
+    const run = await start(reservationWorkflow, [{ reservationId }]);
+    runId = run.runId;
+  } catch (err) {
+    log.error("queue.reopen.workflow_start_failed", err, {
+      reservation_id: reservationId,
+    });
+    return {
+      ok: false,
+      error: {
+        code: "INTERNAL_ERROR",
+        message: "No pudimos reabrir la reserva. Intentá de nuevo.",
+      },
+    };
+  }
+
+  // Clear terminal-state markers, bump audit counter, update workflow identity.
+  await sql`
+    UPDATE reservations
+    SET status = 'waiting',
+        ended_at = NULL,
+        no_show_deadline = NULL,
+        called_at = NULL,
+        workflow_run_id = ${runId},
+        active_hook_token = ${`reservation:${reservationId}:waiting`},
+        reopen_count = reopen_count + 1,
+        updated_at = NOW()
+    WHERE id = ${reservationId}
+  `;
+
+  const occurredAt = new Date().toISOString();
+
+  // D-10 DB-backed safety net: persist audit event before publishing.
+  const inserted = (await sql`
+    INSERT INTO reservation_events (reservation_id, event_type, payload)
+    VALUES (
+      ${reservationId},
+      'reopened',
+      ${JSON.stringify({ occurred_at: occurredAt, prior_status: "no_show", run_id: runId })}::jsonb
+    )
+    RETURNING id
+  `) as Array<{ id: number }>;
+
+  await publishReservationEvent(reservationId, {
+    id: inserted[0].id,
+    type: "reservation.reopened",
+    reservation_id: reservationId,
+    occurred_at: occurredAt,
+    status: "waiting",
+  });
+  await publishQueueEvent({
+    type: "reservation.reopened",
+    reservation_id: reservationId,
+    occurred_at: occurredAt,
+    status: "waiting",
+  });
+
+  log.info("queue.reopen.ok", {
+    reservation_id: reservationId,
+    run_id: runId,
+  });
+
+  return {
+    ok: true,
+    data: { reservation_id: reservationId, new_status: "waiting" },
   };
 }
